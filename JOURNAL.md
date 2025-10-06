@@ -9,7 +9,7 @@ Storage 224 GB SSD KINGSTON SUV400S37240G
 Graphics card Intel(R) HD Graphics 4600 (113 MB)
 ```
 which included Power Cable + Original HP AC Adapter + HP mouse.
-The reason for using a mini PC is explained in issue [#3](https://github.com/MarcSerraPeralta/homelab/issues/3).
+The reason for using a mini PC as a home server is explained in issue [#3](https://github.com/MarcSerraPeralta/homelab/issues/3).
 I have chosen this specific mini PC because it is cheap and the CPU has a "high" frequency (see [hardware recommendations for Tailscale](https://tailscale.com/kb/1320/performance-best-practices#machine-sizing-recommendations)) and 4 cores.
 
 The system boots up and Windows runs correctly. 
