@@ -1,2 +1,2 @@
 # homelab
-Information about my homelab setup.
+Journal about my homelab setup.
