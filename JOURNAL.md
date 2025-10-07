@@ -4,7 +4,7 @@ I just bought a HP Elitedesk 800 G1 USDT (for 50.00€) with the following specs
 ```
 Operating system: Windows 10 Pro
 Processor Intel(R) Core(TM) i5-4590S CPU @ 3.00GHz 
-Installed RAM 8 GB
+Installed RAM 4+4 GB (1600 MT/s)
 Storage 224 GB SSD KINGSTON SUV400S37240G
 Graphics card Intel(R) HD Graphics 4600 (113 MB)
 ```
