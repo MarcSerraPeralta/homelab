@@ -36,3 +36,6 @@ I am following these steps to install Ubuntu Server:
 1. Go over the installation steps.
     1. The network configuration is more tricky than I expected. Because I dont have time now, I have cancelled the installation and will continue another day.
 
+# 2025/06/11 - Setting up new home server (Part 2)
+
+I have done some research about the network configuration. I will set both IPv4 and IPv6 to automatic, which means that the router assigns a random IP address whenever the router or the PC/server gets rebooted. I can always set up a static IP address for the server later on (this can be done at the server side or at the router side). 
