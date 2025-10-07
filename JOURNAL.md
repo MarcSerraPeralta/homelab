@@ -13,6 +13,7 @@ The reason for using a mini PC as a home server is explained in issue [#3](https
 I have chosen this specific mini PC because it is cheap and the CPU has a "high" frequency (see [hardware recommendations for Tailscale](https://tailscale.com/kb/1320/performance-best-practices#machine-sizing-recommendations)) and 4 cores.
 
 The system boots up and Windows runs correctly. 
+I am using the Displayport to connect to my display and an ethernet cable for Internet.
 
 The first thing I will do is install Ubuntu Server 24.04 LTS because:
 - the OS uses little resources (does not have GUI)
@@ -38,4 +39,69 @@ I am following these steps to install Ubuntu Server:
 
 # 2025/06/11 - Setting up new home server (Part 2)
 
-I have done some research about the network configuration. I will set both IPv4 and IPv6 to automatic (DHCP = Dynamic Host Configuration Protocol), which means that the router assigns a random IP address whenever the router or the PC/server gets rebooted. I can always set up a static IP address for the server later on (this can be done at the server side or at the router side). 
+I have done some research about the network configuration. 
+I will set both IPv4 and IPv6 to automatic (DHCP = Dynamic Host Configuration Protocol), which means that the router assigns a random IP address whenever the router or the PC/server gets rebooted. 
+I can always set up a static IP address for the server later on (this can be done at the server side or at the router side). 
+
+Continuing with the Ubuntu Server installation:
+1. Base for the installation = Ubuntu Server
+1. Network configuration = eno1 with IPv4 automatic (DHCP) and IPv6 automatic (DHCP)
+1. Proxy address = (leave blank)
+1. Mirror address = (I left the default one)
+1. Storage configuration = "Use entire disk" and "Set up this disk as an LVM group" (selected as default). 
+The LVM is a Logical Volume Manager which makes it easier to resize partitions and add new disks.
+In the summary page of the storage configuration, I see that only 100GB (out of the 235GB available),
+are used as a Logical Volume (mounted at `/`) while the other 135GB are not allocated.
+As it will be easy to resize partitions (because of LVM), I will leave the LV as is. 
+1. Ubuntu Pro = (I left it as not selected)
+1. SSH configuration = Select "Install OpenSSH server" (so that I can SSH into the server)
+1. Featured server snaps = (leave all of them unchecked)
+
+After this, the installation has started (it only took a couple of minutes).
+Then, I reboot the PC (it asks me to remove the USB stick and then press `Enter`). 
+The PC has rebooted without issues. I log in with my new username (specified in the `myserver login:` field) and my new password.
+
+Fist thing is to check that my server is connected to the internet:
+```
+ip a
+```
+which returns me an IP address for `eno1`. Also,
+```
+ping -c 3 8.8.8.8
+ping -c 3 google.com
+```
+(8.8.8.8 is one of Google’s public DNS servers, always online and reliable)
+I have an average round-trip time for `google.com` of ~4ms, which is good.
+
+Second thing to do is to update the system:
+```
+sudo apt update
+sudo apt upgrade
+sudo apt autoremove
+```
+
+Now I can test the internet bandwidth, I have installed `speedtest-cli` and run its test:
+```
+sudo apt install speedtest-cli
+speedtest-cli --secure
+```
+I get the following performance (connected via Ethernet cable):
+```
+Hosted by ... [176.88 km]: 8.658 ms
+Download: 89.36 Mbit/s
+Upload: 95.25 Mbit/s
+```
+which is more or less what I see in my laptop when connected via Ethernet.
+
+Next is to set up a static IP address to reliable access this server via Tailscale.
+For that, I am going to do a DHCP reservation in my router (so that my server always get assigned the same IP).
+Once done, if I run `ip a` I get the reserved IP address, so it works.
+I have rerun the tests to check the internet speed. 
+
+I have SSHed to my server in my laptop using
+```
+<username>@<myserver-ip>
+```
+I would like to be able to access to my server from all devices using its hostname (instead of its IP).
+However, my TP-Link router does not seem to allow for adding local DNS entries.
+
