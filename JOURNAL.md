@@ -38,4 +38,4 @@ I am following these steps to install Ubuntu Server:
 
 # 2025/06/11 - Setting up new home server (Part 2)
 
-I have done some research about the network configuration. I will set both IPv4 and IPv6 to automatic, which means that the router assigns a random IP address whenever the router or the PC/server gets rebooted. I can always set up a static IP address for the server later on (this can be done at the server side or at the router side). 
+I have done some research about the network configuration. I will set both IPv4 and IPv6 to automatic (DHCP = Dynamic Host Configuration Protocol), which means that the router assigns a random IP address whenever the router or the PC/server gets rebooted. I can always set up a static IP address for the server later on (this can be done at the server side or at the router side). 
