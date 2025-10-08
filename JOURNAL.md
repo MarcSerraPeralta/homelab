@@ -1,4 +1,4 @@
-# 2025/06/10 - Setting up new home server (Part 1)
+# 2025/10/06 - Setting up new home server (Part 1)
 
 I just bought a HP Elitedesk 800 G1 USDT (for 50.00€) with the following specs:
 ```
@@ -37,7 +37,7 @@ I am following these steps to install Ubuntu Server:
 1. Go over the installation steps.
     1. The network configuration is more tricky than I expected. Because I dont have time now, I have cancelled the installation and will continue another day.
 
-# 2025/06/11 - Setting up new home server (Part 2)
+# 2025/10/07 - Setting up new home server (Part 2)
 
 I have done some research about the network configuration. 
 I will set both IPv4 and IPv6 to automatic (DHCP = Dynamic Host Configuration Protocol), which means that the router assigns a random IP address whenever the router or the PC/server gets rebooted. 
@@ -198,3 +198,22 @@ Using my phone, I checked that I can connect to the exit node of my server (with
 Final comment, I have tried SSHing to `myserver` when UFW denies SSH and it still works from my laptop, so I am just going to keep SSH denied.
 I have also rebooted the server to check that all the configuration has not changed and that the exit node still works.
 
+
+# 2025/10/08 - Bechmarking home server and solving bugs
+
+I wanted to benchmark the exit node by running some speed tests on my smartphone.
+The results of speedtest.net for bandwidth and ping are:
+```
+WiFi: 81.39 Mbps and 9 ms
+data: 80.82 Mbps and 14 ms
+data + connected to tailnet: 81.25 Mbps and 20 ms
+data + connected to my server (exit node): 79.74 Mbps and 26 ms
+```
+(I was connected to the same server for all the tests)
+
+During this benchmark I have seen some issues that need to be solved:
+- Keyboard does not work if plugged after the server is turned on. 
+However, it works if it is connected before turning on the server.
+- Tailscale is not up by default after reboot (+ user log in).
+
+I have created two issues in GitHub to keep track of the problems that need to be solved.
