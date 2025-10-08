@@ -217,3 +217,17 @@ However, it works if it is connected before turning on the server.
 - Tailscale is not up by default after reboot (+ user log in).
 
 I have created two issues in GitHub to keep track of the problems that need to be solved.
+
+In the meantime, I will start installing pi-hole following [its guide](https://docs.pi-hole.net/main/basic-install/).
+Before the installation, I will set up Tailscale in the server using:
+```
+sudo tailscale down
+sudo tailscale up --accept-dns=false
+```
+following the steps in [this post](https://fullmetalbrackets.com/blog/pihole-anywhere-tailscale/#set-up-tailscale).
+The reason for doing that is because our server will now also act as a DNS resolver (because it will have pi-hole in it).
+When pi-hole starts, it needs to know where to send its own DNS queries by checking the DNS provider for the server,
+so if the server is configured to use pi-hole as its upstream DNS, then we get caught in a recursive loop.
+The flag is to avoid this recursive loop (more info in the [Tailscale docs](https://tailscale.com/kb/1072/client-preferences#use-tailscale-dns-settings)).
+The situation is a little bit complex, so I will make sure that I understand it and explain it before continuing.
+
