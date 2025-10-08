@@ -202,7 +202,7 @@ I have also rebooted the server to check that all the configuration has not chan
 # 2025/10/08 - Bechmarking home server and solving bugs
 
 I wanted to benchmark the exit node by running some speed tests on my smartphone.
-The results of speedtest.net for bandwidth and ping are:
+The results of speedtest.net in my phone for bandwidth and ping are:
 ```
 WiFi: 81.39 Mbps and 9 ms
 data: 80.82 Mbps and 14 ms
@@ -218,6 +218,20 @@ However, it works if it is connected before turning on the server.
 
 I have created two issues in GitHub to keep track of the problems that need to be solved.
 
+I have also done some extra benchmarks using laptop on my unversity's internet:
+```
+(download, upload, ping)
+Ethernet: 181.38 Mbps, 152.97Mbps, 8ms
+Ehternet + connected to my server (exit node): 85.59 Mbps, 52.28 Mbps, 16ms
+```
+so it seems that the exit node / my server is limited by the internet speed at my home, which is (on my laptop)
+```
+(download, upload, ping)
+via Ethernet: 93.58 Mbps, 94.05 Mbps, 7ms
+via WiFi: 67.90 Mbps, 90.85 Mbps, 21ms
+```
+(obvously my Elitedesk PC is connected via ethernet).
+
 In the meantime, I will start installing pi-hole following [its guide](https://docs.pi-hole.net/main/basic-install/).
 Before the installation, I will set up Tailscale in the server using:
 ```
@@ -225,9 +239,19 @@ sudo tailscale down
 sudo tailscale up --accept-dns=false
 ```
 following the steps in [this post](https://fullmetalbrackets.com/blog/pihole-anywhere-tailscale/#set-up-tailscale).
-The reason for doing that is because our server will now also act as a DNS resolver (because it will have pi-hole in it).
-When pi-hole starts, it needs to know where to send its own DNS queries by checking the DNS provider for the server,
-so if the server is configured to use pi-hole as its upstream DNS, then we get caught in a recursive loop.
-The flag is to avoid this recursive loop (more info in the [Tailscale docs](https://tailscale.com/kb/1072/client-preferences#use-tailscale-dns-settings)).
-The situation is a little bit complex, so I will make sure that I understand it and explain it before continuing.
+The reason for doing that is because our server will now also act as a DNS resolver for both the tailnet and the local network (because it will have pi-hole in it).
+The flag is to avoid a 'recursive loop' (more info in the [Tailscale docs](https://tailscale.com/kb/1072/client-preferences#use-tailscale-dns-settings)),
+which I will explain now.
+First note that the device with the pi-hole acts as both a DNS server for clients and a DNS client (e.g. when searching `google.com` inside the device or doing `apt update`).
+The recursion occurs when the device acts as a client, because when it tries to ask "What is the IP of `google.com`" to the DNS resolver it is basically asking itself "What is the IP og `google.com`" because it is the DNS resolver. 
+This ends in a recursion loop. This happens in both the tailnet and local network as each one has their own different DNS resolver. 
 
+For the local network, this can be solved by setting the resolver of the device hosting pi-hole to an external DNS like 8.8.8.8 (Google). 
+Then, device knows that if it needs to act as a DNS client, it should look at the external DNS.
+
+For the tailnet, one also needs to use the flag `--assign-dns=false` to ensure Tailscale doesn’t overwrite the DNS settings of the device with pi-hole from the previous paragraph with the device's own IP (leading to the mentioned recursion).
+
+Therefore, 
+- before installing pi-hole into my server, I will turn off tailnet so that first I only have to deal with the local network.
+- while installing pi-hole into my server, I need to make sure to make sure to set up an external DNS (this is to avoid the recursion in my local network)
+- after installing pi-hole into my server, I need to turn on tailscale with `--assign-dns=false` (to avoid the recursion in my tailnet)
