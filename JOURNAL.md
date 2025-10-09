@@ -392,3 +392,9 @@ sudo tailscale up --exit-node=
 ```
 and checked that I can do e.g. `ping google.com`.
 
+Finally, I have added the following ad-list to pi-hole:
+```
+https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.txt
+```
+see GitHub issue [#10](https://github.com/MarcSerraPeralta/homelab/issues/10) for explaination.
+Remeber to run `sudo pihole -g` after updating the ad lists.
