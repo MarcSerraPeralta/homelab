@@ -255,3 +255,140 @@ Therefore,
 - before installing pi-hole into my server, I will turn off tailnet so that first I only have to deal with the local network.
 - while installing pi-hole into my server, I need to make sure to make sure to set up an external DNS (this is to avoid the recursion in my local network)
 - after installing pi-hole into my server, I need to turn on tailscale with `--assign-dns=false` (to avoid the recursion in my tailnet)
+
+# 2025/10/09 - Installing Pi-hole
+
+Now that I know what is the correct way of setting up the pi-hole (see notes from 2025/10/08), I will install pi-hole on my server.
+First, I made sure that Tailscale was down:
+```
+sudo tailscale down
+sudo tailscale status
+```
+As a side comment, Tailscale was up when I booted the server, so I am going to close the corresponding GitHub issue (maybe last time I had it down before reboot so it stayed down).
+The issue about the keyboard still persists.
+
+Then, I followed the guide from the [pi-hole docs](https://docs.pi-hole.net/main/basic-install/).
+- During the installation, it tells me to make sure that the server has a static IP address, which does.
+- It also asks me to choose and interface: `eno1` or `tailscale0`. 
+I choose `eno1` (which is the local network) because I can then configure Tailscale to use my server as DNS.
+- For the upstream DNS provider, I chose `Cloudflare` because it does not store as much log info as Google.
+- I included StevenBlack's unified hosts list.
+- Regarding query logging, I have enabled it to check that everything works fine at the beginning, but I will most likely disable it afterwards.
+ have also selected `Show everything` as privacy mode for FTL to check that everything works, but then I will turn it down to `Hide domains and clients` or `Anonymous mode`.
+
+To check that the installation has been successful, I check that pi-hole is active:
+```
+pihole status
+pihole version
+```
+(my pi-hole core version is v6.1.4, web version v6.2.1 and FTL version v6.2.3).
+Just to make sure everything is up to date:
+```
+sudo pihole -up
+```
+
+Next, I wanted to check the Web UI using the HTTP link and password prompted after the installation.
+However, the HTTP link gets a timeout error in my laptop.
+Researching on the internet, I found  [this forum discussion](https://discourse.pi-hole.net/t/upgrading-to-v6-pihole-up-didnt-disable-lighttpd/76307) and [this other one](https://discourse.pi-hole.net/t/pihole-appears-to-be-working-but-i-cant-access-the-web-interface/61226/4).
+- I rebooted my server but the Web UI is still not working. 
+- I have installed `lighttpd` using
+```
+sudo apt install lighttpd
+```
+The problem is that lightpad cannot start correctly because pi-hole is using port 80.
+```
+sudo journalctl -u lighttpd --no-pager | tail -20
+sudo ss -tlnp | grep :80
+```
+Therefore, I need to stop the pi-hole, start lighttpd, and then start pi-hole again:
+```
+sudo systemctl stop pihole-FTL
+sudo systemctl restart lighttpd
+sudo systemctl status lighttpd
+sudo systemctl start pihole-FTL
+sudo systemctl status pihole-FTL
+sudo systemctl status lighttpd
+sudo pihole -r
+sudo systemctl restart lighttpd
+sudo systemctl restart pihole-FTL
+```
+So, this didn't work out.
+- I have uninstalled pi-hole and set the DNS provider to Cloudflare
+```
+sudo pihole uninstall
+sudo vim /etc/resolv.conf # edit the nameserver line and set it to 1.1.1.1
+```
+
+I will now install again pi-hole. First, I make sure that lighttpd is properly running:
+```
+sudo systemctl restart lighttpd
+sudo systemctl status lighttpd
+```
+Then, I checked that for the pi-hole requirements, I need to have the following
+```
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw allow 53/tcp
+ufw allow 53/udp
+ufw allow 67/tcp
+ufw allow 67/udp
+ufw allow 123/udp
+```
+which I didn't (`sudo ufw status verbose`).
+I have installed pi-hole with sudo:
+```
+curl -sSL https://install.pi-hole.net | sudo bash
+```
+Now, when I try to go to the provided website, I don't get a timeout error, I get a "403 Forbidden Error".
+The problem is that lighttdp is using port 80 so pihole cannot use it (`sudo ss -tulnp`).
+I just disabled lighttdp and restarted pihole-FTL:
+```
+sudo systemctl stop lighttpd
+sudo systemctl disable lighttpd
+sudo systemctl restart pihole-FTL
+sudo systemctl status pihole-FTL
+```
+Now the pi-hole Web UI works!!
+
+What I believe the actual problem was:
+- I did not look at the prerequisites and didn't have the correct ufw setup
+- maybe I required to do `sudo bash` when installing Pi-hole
+
+I will not uninstall lighttdp, I will just keep it disabled.
+
+First thing now to do is to change the pi-hole password:
+```
+sudo pihole setpassword
+```
+
+Now I will have to configure my networks to use the Pi-hole as their DNS server (see [pi-hole docs](https://docs.pi-hole.net/main/post-install/)).
+As a comment, the installation said that I have not configured Pi-hole for IPv6 (only IPv4).
+
+For the local network, I just went to the router settings and changed the DNS to the IP of the server.
+I had to reboot (not reset) the router to apply the changes.
+
+For the Tailnet, in my server, I run
+```
+sudo tailscale up --assign-dns=false --advertise-exit-node
+```
+To check that there is no recursion loop, I run:
+```
+ping google.com
+```
+which works.
+Then, to configure the Tailnet DNS, I follow the guide in [this Tailscale post](https://tailscale.com/kb/1114/pi-hole#step-4-set-raspberry-pi-as-the-dns-server-for-your-tailnet).
+There is one important thing to do so that pi-hole can be the DNS for tailnet: one needs to select "Permit all origins" so that requests from the tailnet are also answered.
+By default, pi-hole only listens to local requests (i.e. from the local network), but we also want it to answer requests from the tailnet.
+This can be done in the Web UI or in the terminal by editing `/etc/pihole/pihole.toml` and 
+changing `listeningMode = "LOCAL` to `listeningMode = "ALL"` (not that his varies dependning on the pi-hole version).
+Then, one needs to restart pi-hole:
+```
+sudo systemctl restart pihole-FTL
+sudo systemctl status pihole-FTL
+```
+In my laptop, I run
+```
+sudo tailscale up --exit-node=
+```
+and checked that I can do e.g. `ping google.com`.
+
