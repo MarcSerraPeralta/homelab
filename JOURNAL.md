@@ -398,3 +398,14 @@ https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.txt
 ```
 see GitHub issue [#10](https://github.com/MarcSerraPeralta/homelab/issues/10) for explaination.
 Remeber to run `sudo pihole -g` after updating the ad lists.
+
+
+# 2025/10/10 - Small changes to pi-hole settings
+
+I have changed the logging settings of the pi-hole.
+In the pi-hole web UI, go to Settings > Privacy. 
+Select "Expert mode" (click on the "Basic" toggle) and set the Query Anonymization to "Hide domains: Display and store all domains as hidden".
+This means that the domains are not stored and cannot be seen, which improves the privacy. 
+
+By default, pi-hole only stores the logs for up to 91 days (see `maxDBdays` in `/etc/pihole/pihole.toml`), which is good for storage purposes.
+I will leave it like this.
