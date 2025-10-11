@@ -409,3 +409,17 @@ This means that the domains are not stored and cannot be seen, which improves th
 
 By default, pi-hole only stores the logs for up to 91 days (see `maxDBdays` in `/etc/pihole/pihole.toml`), which is good for storage purposes.
 I will leave it like this.
+
+
+# 2025/10/11 - Shut down home server
+
+I have shut down the home server because I want to clean the fans (it is a little bit noisy and bothers me).
+After shutting it down, I have changed the DNS prover in the router settings to the default one (not my home server's IP).
+Also, if the internet does not work for some devices, make sure that they are not connected to the tailnet.
+Recall that the DNS provider for the tailnet is the home server (which is now turned off).
+I could change it to the default one, but what is the point of using the tailnet if I don't have my home server turned on.
+I have also made the router use only WPA2 for wireless security (before it was using both WPA2 and WPA, which is not super secure).
+
+I have also tested the tailnet's internet speed between two countries (Spain - Netherlands) and I obtained ~80 Mbps.
+The bandwidth of my spanish WiFi is 600 Mbps and the cause of the tailnet bandwidth being 80 Mbps is that my dutch internet speed is 80 Mbps.
+
