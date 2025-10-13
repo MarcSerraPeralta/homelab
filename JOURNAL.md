@@ -423,3 +423,11 @@ I have also made the router use only WPA2 for wireless security (before it was u
 I have also tested the tailnet's internet speed between two countries (Spain - Netherlands) and I obtained ~80 Mbps.
 The bandwidth of my spanish WiFi is 600 Mbps and the cause of the tailnet bandwidth being 80 Mbps is that my dutch internet speed is 80 Mbps.
 
+
+# 2025/10/12 - Share my server with other people
+
+I have shared my server (which I turned on) with my girlfriend so that she can also block the ads with pi-hole. 
+This can be done following the instructions in the [Tailscale docs](https://tailscale.com/kb/1084/sharing). 
+Note that "sharing" is not the same as inviting someone to your whole tailnet; here I am just making my server available to my girlfriend's tailnet. 
+For example, she cannot see my phone or my laptop when they are connected to my tailnet. 
+After configuring her tailnet to use my server as DNS provider, she can have an (almost-)free-ad experience in her phone. 
