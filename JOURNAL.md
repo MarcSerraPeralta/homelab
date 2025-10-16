@@ -431,3 +431,31 @@ This can be done following the instructions in the [Tailscale docs](https://tail
 Note that "sharing" is not the same as inviting someone to your whole tailnet; here I am just making my server available to my girlfriend's tailnet. 
 For example, she cannot see my phone or my laptop when they are connected to my tailnet. 
 After configuring her tailnet to use my server as DNS provider, she can have an (almost-)free-ad experience in her phone. 
+
+
+# 2025/10/16 - Setting a subnet router to see local IP addresses/websites
+
+I am setting up the subnet router described in issue [#11](https://github.com/MarcSerraPeralta/homelab/issues/11) 
+in order to be able to see my router in the tailnet and access it remotely.
+I am following the instructions in the [tailscale docs](https://tailscale.com/kb/1019/subnets#set-up-a-subnet-router).
+Regarding the IP forwarding, I already set up that in 2025/10/07. 
+Note that this IP forwarding in Tailscale is not the same a "port forwarding" in a router (which can be a big security risk).
+My router can be locally accessed in the following website: `http://192.168.0.1/`, 
+so I will run the usual `sudo tailscale up` with this extra flag:
+```
+--advertise-routes=192.168.0.0/24
+```
+Note that the last IP digit is a `0` (not a `1`) because I need to pass it a valid network address, not the host address.
+The IP address `192.168.0.0` means "Route all traffic destined for 192.168.0.x through me (the subnet router)".
+As stated in the guide, remember to set up the subnet routes through the Tailscale Admin Console (website).
+
+In order to see the my router's webpage, I need to restart my Tailscale connection and pass it this extra argument:
+```
+--accept-routes=true
+```
+Then, I can run the following
+```
+ping 192.168.0.1
+```
+which runs correctly and I can also visit `http://192.168.0.1/`. 
+
