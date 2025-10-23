@@ -478,3 +478,35 @@ Seeing this, I believe that the "problem" is not actually a problem and more lik
 Because I can always connect via SSH to my server and because I do not plan on connecting any storage via USB,
 I will close the corresponding issue in GitHub about this problem.
 
+
+# 2025/10/23 - Mitigating fan noise
+
+Before doing anything about the fan noise, I measured how bad it is with the microphone of my smartphone (results may not be precise):
+- background (server turned off): 40-42 dB
+- server on and mic at 30cm from it: 45 dB
+- server on and mic at 1cm from it: 50 dB
+
+I disassembled the CD/DVD, SDD/HDD and both fans following [this video](https://www.youtube.com/watch?v=pP0L6xs-QMw).
+For the rear fan (i.e. not the one for the CPU), I did not remove the motherboard, 
+I just slightly bended one of the top aluminum pieces and was enough to remove the fan.
+I have cleaned the fans (disassembled) and the CPU cooler (without disassembling it) using some toilet paper.
+The cleaning did not reduce that much the noise from my server (which only comes from the fans).
+
+The other thing I wanted to do is to adapt the fan curve so that the fans are not spinning if the CPU does not reach a certain temperature.
+This (in theory) can be done both from the BIOS and the OS.
+I did not have luck in the BIOS because the only setting I can change about the fans is their "idle mode", which was already set to the minimum (see `journal_media`).
+In the OS, I did not have any luck either because I believe that the PWM of the fans is not exposed to the OS level.
+
+As none of the two options worked, I searched more solutions. 
+The reason I don't want to hear anything is because I can only have the server running in my room.
+Other solutions that I found are:
+- buying new good fans (e.g. some Noctua ones)
+- try to do some noise isolation
+
+The price of new fans is quite expensive compare to what the computer has cost me (15€*2 vs 50€).
+I have access to cheap wood and tools, so I will most likely build an encloure following [this video](https://www.youtube.com/watch?v=j8IYsQ6QVp8).
+For the noise-dampening material, I have found pieces around 10-15€ in Praxis and Hornbach.
+However, one needs to be careful with these materials because the foams are usually not "fire safe".
+Based on this and the prices, I will first build an enclousure (without the noise-dampening material),
+test the noise levels, and, if needed, I will add the noise-dampening material.
+
