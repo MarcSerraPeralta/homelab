@@ -459,3 +459,22 @@ ping 192.168.0.1
 ```
 which runs correctly and I can also visit `http://192.168.0.1/`. 
 
+
+# 2025/10/21 - Bad USB connection problem
+
+I have been working on the bad USB connection, trying to debug the cause.
+The issue is very strange, here are my findings:
+- the following things happen with both my keyboard and my mouse in both USB 2.0 and 3.0, thus it is not to a device nor USB type
+- when being in the login page, right after plugging the keyboard, 
+I get the error -110 and the things I type are not registered in the terminal 
+(which initially made me believe that there was a problem with the USB connections)
+- if the keyboard is plugged in before boot, I see the error -110 in the log during boot, but then in the login page, the keyboard works and I can log in.
+- when being in the login page, if I plug the keyboard and wait a little bit (~5-10 seconds), 
+the PC tries to connect again and again to the keyboard until it succeeds (and correctly displays the name and brand of the keyboard in the logs).
+- if I have the keyboard plugged in and correctly working, plugging in the mouse works almost immediately (same vice-versa).
+
+Seeing this, I believe that the "problem" is not actually a problem and more like a "slow process" 
+(in which the PC tries to connect to the USB devices).
+Because I can always connect via SSH to my server and because I do not plan on connecting any storage via USB,
+I will close the corresponding issue in GitHub about this problem.
+
