@@ -504,9 +504,35 @@ Other solutions that I found are:
 - try to do some noise isolation
 
 The price of new fans is quite expensive compare to what the computer has cost me (15€*2 vs 50€).
-I have access to cheap wood and tools, so I will most likely build an encloure following [this video](https://www.youtube.com/watch?v=j8IYsQ6QVp8).
+I have access to cheap wood and tools, so I will most likely build an enclosure following [this video](https://www.youtube.com/watch?v=j8IYsQ6QVp8).
 For the noise-dampening material, I have found pieces around 10-15€ in Praxis and Hornbach.
 However, one needs to be careful with these materials because the foams are usually not "fire safe".
-Based on this and the prices, I will first build an enclousure (without the noise-dampening material),
+Based on this and the prices, I will first build an enclosure (without the noise-dampening material),
 test the noise levels, and, if needed, I will add the noise-dampening material.
 
+
+# 2025/10/25 - Enclousure for my server
+
+I have bought the materials to build the enclosure, the main item is an MDF pane of 122x62 cm and 12mm of thickness (~8€).
+I have attached a schematic and pictures in `journal_media`.
+The design is very close to the one from [this video](https://www.youtube.com/watch?v=j8IYsQ6QVp8).
+
+The server is now set up inside the enclosure and I cannot hear the fan noise.
+In fact, I can hear more the fridge from my kitchen (one closed door away) than the server (although my fridge is kinda noisy for a fridge).
+Therefore, I will not buy any acoustic foam to further dampen the noise from the fans.
+
+I have been tracking the temperature of the CPU using this script:
+```
+#!/bin/bash
+
+LOGFILE="/home/marc/tmp.txt"
+
+for i in {1..1000}; do
+    DATE=$(date '+%Y-%m-%d %H:%M:%S')
+    TEMP_LINE=$(/usr/bin/landscape-sysinfo | grep "Temperature")
+    echo "$DATE - $TEMP_LINE" >> "$LOGFILE"
+    sleep 60
+done
+```
+and the temperatures in the first couple of hours after turning on the server have all been between 34 and 38 degrees Celsius.
+I am happy with these temperatures.
