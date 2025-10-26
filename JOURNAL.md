@@ -536,3 +536,108 @@ done
 ```
 and the temperatures in the first couple of hours after turning on the server have all been between 34 and 38 degrees Celsius.
 I am happy with these temperatures.
+
+
+# 2025/10/26 - Monitor CPU temperature
+
+I want to monitor the CPU temperature to know if the server is heating up.
+Grafana allows one to visualize data from a CPU file in a local website and send email notifications.
+
+First, I need to generate the CPU temperature data and store it in a CSV file.
+This is done by the following script:
+```
+#!/bin/bash
+LOGFILE="/home/marc/monitoring/data/cpu_temp.csv"
+
+# Add header if file doesn't exist
+if [ ! -f "$LOGFILE" ]; then
+    echo "timestamp,temperature_cpu,temperature_zone0,temperature_zone1,temperature_zone2" > "$LOGFILE"
+fi
+
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+TEMP_CPU=$(/usr/bin/landscape-sysinfo | grep -oP 'Temperature:\s*\K[0-9.]+')
+TEMP_Z0=$(cat /sys/class/thermal/thermal_zone0/temp)
+TEMP_Z0=$(awk "BEGIN {printf \"%.1f\", $TEMP_Z0/1000}")
+TEMP_Z1=$(cat /sys/class/thermal/thermal_zone1/temp)
+TEMP_Z1=$(awk "BEGIN {printf \"%.1f\", $TEMP_Z1/1000}")
+TEMP_Z2=$(cat /sys/class/thermal/thermal_zone2/temp)
+TEMP_Z2=$(awk "BEGIN {printf \"%.1f\", $TEMP_Z2/1000}")
+
+echo "$DATE,$TEMP_CPU,$TEMP_Z0,$TEMP_Z1,$TEMP_Z2" >> "$LOGFILE"
+```
+which is made executable and run every minute with `crontab`.
+
+To install Grafana, I followed the instructions on [its documentation](https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/).
+Then, I start it with:
+```
+sudo systemctl enable --now grafana-server
+```
+I can now check my grafana locally (in my laptop) in: http://myserver:3000 
+(note that `myserver` is my server's name in the tailnet).
+
+The initial credentials are `user: admin` and `password: admin`. 
+Grafana tells you to update the password so I did.
+
+Following the instructions on [the docs](https://grafana.com/blog/2025/02/05/how-to-visualize-csv-data-with-grafana/) on how to load CSV data on Grafana,
+I have installed the `Infinity` data source with
+```
+grafana-cli plugins install yesoreyeram-infinity-datasource
+```
+and restarted Grafana
+```
+sudo systemctl restart grafana-server
+```
+Then, I went to `Connections > Data sources` inside Grafana's local website and clicked on `Infiinity`.
+OK, so this data source is only able to load CSV files from HTTP requests.
+I have added a small snipped that serves my recorded monitoring data for HTTP requests in `/etc/systemd/system/monitoring-data-http.service`.
+```
+[Unit]
+Description=HTTP server for the monitoring data
+After=network.target
+
+[Service]
+User=marc
+WorkingDirectory=/home/marc/monitoring/data
+ExecStart=/usr/bin/python3 -m http.server 8081
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+I activate this service with:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable monitoring-data-http.service
+sudo systemctl start monitoring-data-http.service
+```
+and check that it works using:
+```
+sudo systemctl status monitoring-data-http.service
+```
+and that I can download the data from http://myserver:8081
+
+Therefore, I will use http://myserver:8081/cpu_temp.csv to set up the `Infinity` HTTP request.
+In the `Query > Parsing options & Result fields`, I specify the format of the columns (e.g. time, numeric...).
+I am also setting up an alert so that I get an email if the temperature is above 55ºC.
+To receive alerts via email, I need to set up SMTP by editing `/etc/grafana/grafana.ini`,
+```
+[smtp]
+enabled = true
+host = smtp.gmail.com:587
+user = your-email@gmail.com
+password = your-app-password
+skip_verify = false
+from_address = your-email@gmail.com
+from_name = Grafana
+```
+and then restart Grafana using
+```
+sudo systemctl restart grafana-server
+```
+I have clicked on `Test` and I correctly receive a notification email.
+
+I have changed the script so that the CPU temperatures get sampled every 10 seconds.
+I have also disabled the data from temp_zone0 and temp_zone1 because they are static and do not change.
+There is a "bug" in Grafana that it does not know that Europe is in "winter time" so that the time is shifted +1h.
+I have tried connecting the dashboard to the Grafana app in my phone but I can only do the login via HTTP (not HTTPS as the app wants),
+therefore I have just added a shortcut to the webpage in the home page of my phone.
