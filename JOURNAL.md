@@ -641,3 +641,15 @@ I have also disabled the data from temp_zone0 and temp_zone1 because they are st
 There is a "bug" in Grafana that it does not know that Europe is in "winter time" so that the time is shifted +1h.
 I have tried connecting the dashboard to the Grafana app in my phone but I can only do the login via HTTP (not HTTPS as the app wants),
 therefore I have just added a shortcut to the webpage in the home page of my phone.
+
+To really test that everything works, I am going to stress the computer and rise its CPU temperature using:
+```
+sudo apt install stress
+stress --cpu 4 --timeout 60
+```
+The mail works correctly.
+One thing that I have realized is that Grafana assumes your timestamps to be in UTC time.
+Mine are not in UTC and this gives this weird time conversion that Grafana does automatically.
+I have changed it using `date -u '+%Y-%m-%d %H:%M:%S'`, where the `-u` flag is for UTC time.
+I have also changed my contact point so that I do not receive emails when an alert is OK (after being triggered).
+
