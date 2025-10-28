@@ -653,3 +653,43 @@ Mine are not in UTC and this gives this weird time conversion that Grafana does 
 I have changed it using `date -u '+%Y-%m-%d %H:%M:%S'`, where the `-u` flag is for UTC time.
 I have also changed my contact point so that I do not receive emails when an alert is OK (after being triggered).
 
+
+# 2025/10/28 - Bug in CPU-temperature monitoring script
+
+I received an alert from Grafana saying that there was a data-source error for the CPU temperature.
+There was a bug in the script to read the CPU temperature, in particular when making sure that the file has maximum 10000 lines.
+Also, it was not logging the temperature for the time `HH:mm:50`. 
+
+Here is the current version, which solves both issues:
+```
+#!/bin/bash
+LOGFILE="/home/marc/monitoring/data/cpu_temp.csv"
+MAX_LINES=10000
+
+# Add header if file doesn't exist
+if [ ! -f "$LOGFILE" ]; then
+  echo "timestamp,temperature_cpu,temperature_zone0,temperature_zone1,temperature_zone2" > "$LOGFILE"
+fi
+
+for i in {1..6}; do
+  DATE=$(date -u '+%Y-%m-%d %H:%M:%S') # UTC format for Grafana
+  TEMP_CPU=$(/usr/bin/landscape-sysinfo | grep -oP 'Temperature:\s*\K[0-9.]+')
+  TEMP_Z0=$(cat /sys/class/thermal/thermal_zone0/temp)
+  TEMP_Z0=$(awk "BEGIN {printf \"%.1f\", $TEMP_Z0/1000}")
+  TEMP_Z1=$(cat /sys/class/thermal/thermal_zone1/temp)
+  TEMP_Z1=$(awk "BEGIN {printf \"%.1f\", $TEMP_Z1/1000}")
+  TEMP_Z2=$(cat /sys/class/thermal/thermal_zone2/temp)
+  TEMP_Z2=$(awk "BEGIN {printf \"%.1f\", $TEMP_Z2/1000}")
+
+  echo "$DATE,$TEMP_CPU,$TEMP_Z0,$TEMP_Z1,$TEMP_Z2" >> "$LOGFILE"
+
+  # store only the last lines
+  LINE_COUNT=$(wc -l < "$LOGFILE")
+  if (( LINE_COUNT > MAX_LINES + 1 )); then
+    DATA=$(tail -n "$MAX_LINES" "$LOGFILE")
+    printf "timestamp,temperature_cpu,temperature_zone0,temperature_zone1,temperature_zone2\n${DATA}\n" > "${LOGFILE}"
+  fi
+
+  sleep 10
+done
+```
