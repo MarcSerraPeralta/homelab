@@ -693,3 +693,83 @@ for i in {1..6}; do
   sleep 10
 done
 ```
+
+
+# 2025/10/30 - Installing Immich and phone backup
+
+From the [Immich docs](https://docs.immich.app/install/docker-compose/), it is recommended to install Immich via Docker compose.
+Therefore first I need to install Docker. 
+Following the [Docker installation guide](https://docs.docker.com/engine/install/ubuntu/), 
+I first check that I don't have any docker package installed:
+```
+apt list --installed | grep docker
+```
+Regarding the firewall precautions, I will build the Docker container such that it can only talk to devices in my tailnet
+(which I trust), see [issue #17](https://github.com/MarcSerraPeralta/homelab/issues/17).
+Immich recommends installing Docker using `apt`, so I will do that following the Docker guide.
+After the installation, I have checked that Docker is running using:
+```
+sudo systemctl status docker
+```
+and 
+```
+sudo docker run hello-world
+```
+which showed that Docker is active and that it works correctly.
+
+I continue following the installation guide for Immich and download the docker configuration files.
+I have changed the following lines from `docker-compose.yml`:
+```
+ports:
+  - "100.104.237.106:2283:2283"
+```
+and from `.env`:
+```
+# The location where your uploaded files are stored
+UPLOAD_LOCATION=/srv/immich/library
+
+# The location where your database files are stored. Network shares are not supported for the database
+DB_DATA_LOCATION=/srv/immich/postgres
+
+# To set a timezone, uncomment the next line and change Etc/UTC to a TZ identifier from this list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
+TZ=Europe/Amsterdam
+
+# Connection secret for postgres. You should change it to a random password
+# Please use only the characters `A-Za-z0-9`, without special characters or spaces
+DB_PASSWORD=postgres # I have changed it but I won't put it here
+```
+I have run the following commands to create the Immich directory:
+```
+sudo mkdir -p /srv/immich
+sudo chown -R $USER:$USER /srv/immich
+```
+One also needs to add himself to the docker group so that `docker compose up -d` runs correctly:
+```
+sudo usermod -aG docker $USER
+newgrp docker
+```
+Now, I can (for example) run `docker ps`, which works (as I have correct permisions).
+After running the Immich docker, I test that it is working correctly using:
+```
+docker ps
+```
+_Note: server temperature hit 50ºC during `docker compose up -d` but then went back to 40ºC._
+
+I have also run:
+```
+sudo ss -tulpen | grep 2283
+```
+to check that the IP port is only comming from the tailnet IP, not the LAN IP.
+
+After installing Immich, I follow the postinstallation steps from the [Immich docs](https://docs.immich.app/install/post-install):
+- I have enabled to use "Chrome cast". 
+- I have enabled "Storage Template" so that the pictures are auto-organized inside the provided template name.
+- I have created a quota for my user of 10GB.
+
+I have installed the Immich app on my phone and then logged in.
+I have selected to backup the "Camera", "WhatsApp Images", and "WhatsApp Video" albums.
+Then I have enabled backup.
+
+During the upload of the pictures + face recognition, the CPU temperature spiked to 60ºC.
+I should disable face recognition for this backup because the picutres are going to get moved to the external one.
+This way I don't waste CPU resources identifying the faces.
