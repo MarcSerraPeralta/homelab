@@ -775,10 +775,34 @@ I should disable face recognition for this backup because the picutres are going
 This way I don't waste CPU resources identifying the faces.
 
 
-# 2025/10/31 - Grafana dashboard for Immich
+# 2025/10/31 - Grafana dashboard for Immich and choice of hardware storage
 
 I have added a dashboard in Grafana for Immich, which reports the storage usage and the number of photos and videos.
 This can be done using the Immich API (+ API key) through URL requests, which returns JSON data.
 For more information, see [issue #21](https://github.com/MarcSerraPeralta/homelab/issues/21).
 
 I have also solved a problem with the automatic background backup in my Xiaomi phone, see [issue #24](https://github.com/MarcSerraPeralta/homelab/issues/24).
+
+I have been researching about the SATA connectors in the motherboard to know which hardware I should use for storage.
+In `hp_elitedesk_g1_800_usdt`, there is an explanation of the SATA connectors.
+To know the storage I need, I have also checked how much storage I currently require:
+- 165GB of media and documents
+- 115GB of backup for my ThinkPad
+
+The server OS is currently installed in a SATA SSD of 256GB in the standard SATA port of the motherboard.
+I will buy the following:
+- mSATA SSD of 256GB for the OS + Immich phone backup + maybe some documents [~30€]
+- SATA 2.5inch SSD of 1TB for the media, documents, backup of ThinkPad, archive of emails, media center... [~60€]
+
+In case I need more storage, I can always buy the slimline SATA adapter to SATA (in the shape of an optical bay) and another 1TB of 2.5inch SSD storage.
+I can also buy an SSD of 2TB, although they start to be more pricey (60€ vs 120€).
+
+The reason for using SSDs instead of HDDs is that the "NAS" HDDs are 3.5inch and cannot be mounted in my server. 
+Also, my father has been running the same 1TB SSDs in the family NAS for several years now and we haven't had any problem.
+
+For the backup of the cluster, I will use the 512GB and 1TB HDDs that I already have for media and backups.
+
+Regarding the storage for the media center, I plan on only storing the current series that I am watching or movies that I want to watch.
+I don't plan on having a huge library nor movies or series at 4K resolution.
+I will probably have 400GB of storage for the media center. One hour of 1080p or 1440p video takes 2GB-5GB of space, therefore I will be able to store ~100 hours of playtime.
+This is plenty enough to store a couple of seasons of the TV shows that I am watching, which is perfect for me.
