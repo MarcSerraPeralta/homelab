@@ -773,3 +773,11 @@ Then I have enabled backup.
 During the upload of the pictures + face recognition, the CPU temperature spiked to 60ºC.
 I should disable face recognition for this backup because the picutres are going to get moved to the external one.
 This way I don't waste CPU resources identifying the faces.
+
+
+# 2025/10/31 - Grafana dashboard for Immich
+
+I have added a dashboard in Grafana for Immich, which reports the storage usage and the number of photos and videos.
+This can be done using the Immich API (+ API key) through URL requests, which returns JSON data.
+For more information, see [issue #21](https://github.com/MarcSerraPeralta/homelab/issues/21).
+
