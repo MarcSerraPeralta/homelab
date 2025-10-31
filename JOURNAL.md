@@ -781,3 +781,4 @@ I have added a dashboard in Grafana for Immich, which reports the storage usage 
 This can be done using the Immich API (+ API key) through URL requests, which returns JSON data.
 For more information, see [issue #21](https://github.com/MarcSerraPeralta/homelab/issues/21).
 
+I have also solved a problem with the automatic background backup in my Xiaomi phone, see [issue #24](https://github.com/MarcSerraPeralta/homelab/issues/24).
