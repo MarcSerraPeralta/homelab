@@ -806,3 +806,61 @@ Regarding the storage for the media center, I plan on only storing the current s
 I don't plan on having a huge library nor movies or series at 4K resolution.
 I will probably have 400GB of storage for the media center. One hour of 1080p or 1440p video takes 2GB-5GB of space, therefore I will be able to store ~100 hours of playtime.
 This is plenty enough to store a couple of seasons of the TV shows that I am watching, which is perfect for me.
+
+
+# 2025/11/01 - Security webcam installation and storage structure description
+
+I have been thinking on how I am going to categorize everything inside my server.
+Here is what I plan on doing:
+
+mSATA SSD 256GB (with Ubuntu Server)
+```
+/home/marc/
+        |- monitoring/
+           |- log_cpu_temperature.sh
+           |- log_disk_usage.sh
+           |- log_ram_usage.sh
+           |- log_network_usage.sh
+        |- config_files/
+           |- immich/ ...
+/srv/
+ |- monitoring/
+     |- cpu_temperature.csv
+     |- disk_usage.csv
+     |- ram_usage.csv
+     |- network_usage.csv
+ |- immich/ ... (for phone backup)
+```
+SATA SSD 1TB
+```
+/
+|- immich/ ... (for external library)
+|- email_archive/ ...
+|- jellyfin/ ... 
+|- backups/
+    |- thinkpad/ ...
+|- music/
+|- books/
+|- education/ ... (uab, tu delft, bojos, joves, praeludium, nostra llar, industrial, teyca, uoc, crm, ...)
+|- arts_and_crafts/ ... (doodle, recipes, origami, dancing_lessions, presents, ...)
+|- documents/
+    |- token_keys/ 
+    |- visa_countries/
+    |- monthly_expenses/
+    |- certificates/
+    |- administration/
+    |- cards/
+    |- health/
+    |- banks/
+```
+
+As a side note, I will use `df` to monitor disk usage every 1h,
+`free` to monitor ram usage every 10s, 
+and `/sys/class/net/eno1/statistics` to monitor network usage very 1s.
+This will be displayed in a Grafana dashboard.
+
+Today I have recieved the TP-Link Tapo C200.
+I have followed the instructions in the included guide and I have set up the camera with the phone app.
+I have also assigned the camera a static IP address so that I could access it through the tailnet.
+However, apparently, the camera also works when I am not connected to the local wifi and I have tailscale disabled.
+I will keep the static IP, but it is not necessary.
