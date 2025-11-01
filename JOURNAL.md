@@ -864,3 +864,6 @@ I have followed the instructions in the included guide and I have set up the cam
 I have also assigned the camera a static IP address so that I could access it through the tailnet.
 However, apparently, the camera also works when I am not connected to the local wifi and I have tailscale disabled.
 I will keep the static IP, but it is not necessary.
+
+I have disabled IR vision in the camera because it reflects on my windows and I cannot see the street. 
+The normal camera works fine because I have a street lamp 15-20 meters away from my window.
