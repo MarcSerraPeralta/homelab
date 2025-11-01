@@ -867,3 +867,13 @@ I will keep the static IP, but it is not necessary.
 
 I have disabled IR vision in the camera because it reflects on my windows and I cannot see the street. 
 The normal camera works fine because I have a street lamp 15-20 meters away from my window.
+
+Regarding the storage, as I will (most likely) have install again Ubuntu Server in the mSATA drive,
+I will try to play with the home server and install as many things as I can so that I know how they behave.
+First I will start with Jellyfin (for media center).
+I am following the installation guide from [its documentation](https://jellyfin.org/docs/general/installation/linux/).
+During the setup, I have disabled "Allow remote connections to this server" because I already have Tailscale.
+Because I have disabled the remove access, then I need to access jellyfin on my browser using the tailnet IP (jellyfin uses port 8096).
+This is a little bit described in the [Jellyfin docs](https://jellyfin.org/docs/general/post-install/networking/tailscale).
+I am having problems with accessing the Jellyfin server.
+I will continue debugging another day.
