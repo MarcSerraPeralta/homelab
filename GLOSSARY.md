@@ -1,12 +1,12 @@
 # Glossary of my homelab
 
-This is a list of topics/concepts and their corresponding defition and/or contextualization 
+This is a list of topics/concepts and their corresponding definition and/or contextualization 
 that I learned from setting up and running my homelab/server.
 
 The topic that was newer to me was networking:
 
 > [!CAUTION]
-> Misconfiguring your network can lead to security risks!!
+> **MISCONFIGURING YOUR NETWORK CAN LEAD TO SECURITY RISKS!!!**
 
 To avoid any security risk, I have never enabled port forwarding
 and I am able to remotely connect to my network (using Tailscale, which is free and mostly open source).
