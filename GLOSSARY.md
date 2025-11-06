@@ -111,8 +111,6 @@ The router (which is implementing NAT) changes the source and destination IP add
 - Packets passing from the public network back to the private network will have their destination address modified.
 
 ![Alt text](./glossary_media/nat_packet_edits.png?raw=true)
-_Here, "Host" is your laptop in your LAN, and "Server" would be "Google"._
-_Image from Wikipedia_ [[_ref_]](https://en.wikipedia.org/wiki/Network_address_translation).
 
 What happens if your PC asks for "cute dogs" to Google and your laptop asks for "cute cats"?
 How does the router know to which device send each of the answers from Google?
@@ -148,7 +146,134 @@ The private and public network differences explains why it is possible for devic
 _Sources: Wikipedia_
 
 
-### IP address format and ports
+### IP addresses, ports, subnets
+
+Definitions:
+- IP address = identifies the device in a network. 
+- Port = identifies the program or service in a device talking to the network. 
+
+Therefore, the complete information of the source and destination of the packets is given by IP address + port.
+For example if the browser in your laptop asks for "cute dogs" to Google, the source IP address is:
+`{laptop's IP address}:{browser's port}`.
+
+For IPv4, the IP address is a number of 32 bits: between 0 and 2^32 - 1.
+For IPv6, the IP address is a number of 128 bits.
+All devices have 65535 ports (almost 16 bits), so a port is always a number between 0 and 65534.
+
+For IPv4, the IP address is usually written as `{8-bit number}.{8-bit number}.{8-bit number}.{8-bit number}.`.
+An 8-bit number goes from 0 to 255.
+A valid IPv4 address is `192.0.1.120` or `2.2.2.2`.
+
+For IPv6, the IP address is written as 
+`{4 hex}:{4 hex}:{4 hex}:{4 hex}:{4 hex}:{4 hex}:{4 hex}:{4 hex}`,
+that is: eight groups of four hexadecimal digits each, separated by colons.
+The IP address can be shortened, with `0000:0000` being replaced by `:`.
+For example, `2001:0db8:0000:0000:0000:8a2e:0370:7334` 
+becomes `2001:db8::8a2e:370:7334`.
+
+There are some special IP addresses which arise from the use of _subnets_:
+- subnet = a logical subdivision of an IP network, 
+which corresponds to a set of nodes/devices in the network.
+
+The default modern way of specifying a subnet is by a _CIDR block_.
+For now, knowning what a _CIDR block_ is is not important (see definition in the section below),
+we only need how it is represented and written down.
+
+In CIDR notation, a CIDR block is specified with `{IP address}/{number}`, with the number going from 0 to 32.
+The IP addresses of the devices in the CIDR block have the same first `number` bits (from left to right) as the given IP address.
+This prefix for the subnet is known as the _network prefix_.
+For example, `122.50.111.15/24` means that the devices in the CIDR block have IP addresses of the form
+`122.50.111.x` (with `x` any number between 0 and 255), as `3*8 = 24`.
+The rest of the IP address is the _host identifier_,
+which specifes a particular device on that network.
+The number of devices in a particular CIDR block for IPv4 is therefore `2^(32 - number)`.
+
+The special IPv4 addresses and CIDR blocks are:
+- `0.0.0.0` = "All interfaces". 
+It is used to mean "listen to all interfaces/networks" when sending and receiving packets.
+- `127.0.0.0/8` = refers to the same/self device, thus packets never leave the device.
+- `127.0.0.1` = `localhost`, useful for testing or running services locally on a device.
+- `192.168.0.0/16` and `172.16.0.0/12` = private networks.
+- `255.255.255.255` = "Broadcast". It is used to mean "send a message to all devices on the network".
+
+There are also special port numbers:
+- 80 = HTTP
+- 443 = HTTPS
+- 22 = SSH
+- 20-21 = File Transfer Protocol (FTP)
+- 53 = Domain Name System (DNS)
+- 67-68 = Dynamic IP assignment (DHCP)
+- 25 = SMTP (for sending email)
+- 110 = POP3 (for receiving email)
+- 143 = IMAP (for receiving email)
+
+It is possible to specify which programs/services are able to listen/use each port.
+For the case of Linux-based devices, the kernel is responsible for that.
+One can check what is listening to which ports using:
+```
+sudo netstat -tulpen
+```
+which returns
+```
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       User       Inode      PID/Program name    
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      101        24760      930/systemd-resolve 
+tcp        0      0 0.0.0.0:36407           0.0.0.0:*               LISTEN      1000       52460      5542/deno           
+tcp        0      0 127.0.0.1:631           0.0.0.0:*               LISTEN      0          32887      1251/cupsd          
+tcp        0      0 100.90.224.7:37947      0.0.0.0:*               LISTEN      0          30344      1107/tailscaled     
+tcp6       0      0 ::1:631                 :::*                    LISTEN      0          32886      1251/cupsd          
+tcp6       0      0 :::80                   :::*                    LISTEN      0          28883      1189/apache2        
+tcp6       0      0 fd7a:115c:a1e0::7:45441 :::*                    LISTEN      0          30346      1107/tailscaled     
+udp        0      0 0.0.0.0:47367           0.0.0.0:*                           122        32839      988/avahi-daemon: r 
+udp        0      0 127.0.0.53:53           0.0.0.0:*                           101        24759      930/systemd-resolve 
+udp        0      0 0.0.0.0:41641           0.0.0.0:*                           0          25170      1107/tailscaled     
+udp        0      0 0.0.0.0:5353            0.0.0.0:*                           122        32837      988/avahi-daemon: r 
+udp6       0      0 :::55330                :::*                                122        32840      988/avahi-daemon: r 
+udp6       0      0 :::41641                :::*                                0          25169      1107/tailscaled     
+udp6       0      0 :::5353                 :::*                                122        32838      988/avahi-daemon: r
+```
+
+_Sources: Wikipedia_
+
+
+### DHCP, static and dynamic IP addresses
+
+Definitions:
+- _Dynamic Host Configuration Protocol_ (_DHCP_) = network management protocol used on Internet Protocol networks 
+for automatically assigning IP addresses (and other parameters) to devices in the network.
+- _DCHP server_ = component/device in a network that assigns IP addresses following the DHCP.
+
+The role of the DHCP is to avoid devices self assigning an IP address which can lead to conflicts,
+i.e. two devices with the same IP address inside the same network.
+
+In the home LAN, the DHCP server is the router.
+The IP assignments may be _static_ (fixed or permanent) or _dynamic_.
+The dynamic ones change every time the device is connected to the network
+and can also change every a certain number of hours.
+By default, the IP assignments are dynamic.
+Static IP addresses are only required for e.g. servers, printers, routers...
+
+Static IP addresses can be set up thank to the _MAC address_ present in all devices:
+- _Medium Access Control address_ (_MAC address_) = unique identifier "burned in" in any device that can connect to a network.
+
+Therefore, MAC addresses can be used as a device indentifier in networks and allow for being able to assign the same IP address to a device every time it connects to the network.
+
+The general steps to assign an IP address to a device are:
+1. DISCOVER: the device/client (without an IP address) broadcasts a message to search for a DHCP server to `255.255.255.255`.
+The message includes the _MAC address_ of the device.
+2. OFFER: the DHCP server receives the message and reserves an IP address for the device
+(identified by the MAC address). It then sends a message to the device with the reserved IP address.
+3. REQUEST: the device requests the offered address to the DHCP server. 
+This is done because the device can receive DHCP offers from multiple servers, but it will accept only one of them. 
+4. ACKNOWLEDGEMENT: the DHCP server sends the lease duration and any other information that the device requested.
+
+In home routers, one can specify the range of dynamic IP addresses that can be offered in the DHCP, as well as the range of static IP addresses.
+It is important that the two ranges do not overlap, so that e.g.
+the static address of device A (which is currently not connected to the network, thus the IP address is not used) 
+is not given as a dynamic address to device B. Then, if device A connects to the network, there is a conflict of IP addresses.
+
+_Source: Wikipedia_
+
 
 ### Firewall and `iptables`
 
@@ -158,6 +283,16 @@ _Sources: Wikipedia_
 
 ### Linux commands for networking
 
+- list programs/services and the port they are listening to:
+```
+sudo netstat -tulpen
+```
+- routing table:
+```
+ip route show
+```
+see section _IP routing, routing tbales, CIDR_ for more information of the output.
+
 ### NAT transversal
 
 ### DNS
@@ -165,6 +300,50 @@ _Sources: Wikipedia_
 ### DNS in tailnet
 
 ### TCP, UDP
+
+### IP routing, routing tables, CIDR
+
+Definition:
+- IP routing = the process of deciding which path the packets should take through the network.
+
+As mentioned before, the packets contain a source IP address and a destination one.
+Routers need to forward the packets to the correct destination.
+Note that a packet can jump/hop through several routers until reaching its destination.
+Routers have a _routing table_ to perform IP routing:
+- Routing table = a lookup table to know where to send/forward the packets, e.g. "if the packet destination is X, send it to Y".
+
+Routers look at each packet’s destination IP address and forward it toward its next hop, 
+step by step, until it reaches the target device.
+Instead of listing every IP address in the routing table, routers use _CIDR blocks_
+to represent a group of addresses that share the same route.
+This reduces the storage used by the routing table and also allows routers to make decisions more efficiently.
+- _Classless Inter-Domain Routing_ (_CIDR_) = method for allocating IP addresses for IP routing.
+- _CIDR block_ = set of IP addresses that share the same IP route.
+
+To get the routing table in a Linux device, run:
+```
+ip route show
+```
+which returns something like
+```
+default via 192.168.0.1 dev eno1 proto dhcp src 192.168.0.42 metric 100 
+192.168.0.0/24 dev eno1 proto kernel scope link src 192.168.0.42 
+```
+which means
+- `default` = `0.0.0.0/0` = everything
+- after `via` specifies where to send the packets
+- after `dev` specifies which interface to use
+- after `proto` specifies who added this line in the routing table
+- `scope link` = only valid for IP addresses reachable on this link/device (no `via`)
+- after `src` specifies which source IP to use when sending the packets
+- after `metric` specifies the priority of this rule in case multiple rules apply (lower = more priority)
+
+Then, the output shown above means:
+- Send all traffic not matching a more specific rule to `192.168.0.1` (the router) via `eno1` using `192.168.0.42` as source for the packets.
+- For any traffic to `192.168.0.x` addresses, send it directly through `eno1` using `192.168.0.42` as source for the packets.
+
+_Sources: Wikipedia_
+
 
 ## Server
 
