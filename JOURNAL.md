@@ -870,10 +870,72 @@ The normal camera works fine because I have a street lamp 15-20 meters away from
 
 Regarding the storage, as I will (most likely) have install again Ubuntu Server in the mSATA drive,
 I will try to play with the home server and install as many things as I can so that I know how they behave.
+
 First I will start with Jellyfin (for media center).
-I am following the installation guide from [its documentation](https://jellyfin.org/docs/general/installation/linux/).
+I am following the installation guide for bare metal from [its documentation](https://jellyfin.org/docs/general/installation/linux/).
 During the setup, I have disabled "Allow remote connections to this server" because I already have Tailscale.
 Because I have disabled the remove access, then I need to access jellyfin on my browser using the tailnet IP (jellyfin uses port 8096).
 This is a little bit described in the [Jellyfin docs](https://jellyfin.org/docs/general/post-install/networking/tailscale).
 I am having problems with accessing the Jellyfin server.
 I will continue debugging another day.
+
+
+# 2025/11/06 - Running Jellyfin
+
+I have checked that the Jellyfin service is active using `systemd` 
+and that Jellyfin is listening to anything in port 8096:
+```
+sudo ss -tulpen | grep 8096
+```
+I can load `http://100.104.237.106:8096`, but Jellyfin tells me to add a server.
+Trying `100.104.237.106:8096` or `192.168.0.50` results in the following message:
+```
+Connection Failure
+We're unable to connect to the selected server right now. 
+Please ensure it is running and try again.
+```
+The first thing I tried is uninstalling jellyfin (`sudo apt remove jellyfin`) and
+running the installation script again. 
+However, the problem persisted.
+
+Looking at the logs from Jellyfin (in `/var/log/jellyfin`), I see the following lines:
+```
+[2025-11-06 19:25:52.562 +01:00] [WRN] Blocking request to "%2fSystem%2fInfo%2fPublic" by "100.90.224.7" due to IP filtering rule, reason: RejectDueToRemoteAccessDisabled
+```
+and 
+```
+[2025-11-06 19:29:04.158 +01:00] [INF] Defined LAN subnets: ["127.0.0.1/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+[2025-11-06 19:29:04.158 +01:00] [INF] Defined LAN exclusions: []
+[2025-11-06 19:29:04.159 +01:00] [INF] Used LAN subnets: ["127.0.0.1/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+[2025-11-06 19:29:04.160 +01:00] [INF] Filtered interface addresses: ["127.0.0.1", "192.168.0.50", "172.18.0.1", "100.104.237.106"]
+[2025-11-06 19:29:04.160 +01:00] [INF] Bind Addresses ["0.0.0.0"]
+[2025-11-06 19:29:04.160 +01:00] [INF] Remote IP filter is "Allowlist"
+[2025-11-06 19:29:04.160 +01:00] [INF] Filtered subnets: []
+```
+
+The problem is with the IP filtering rule, which is set as `"Allowlist"`.
+
+I have tried editing the config files in `/var/lib/jellyfin/config/`, but the directory is empty. 
+Searching on the web, I have seen that if the Jellyfin installation is done bare metal, 
+then the config files are inside `/etc/jellyfin/`.
+
+I have edited the file `/etc/jellyfin/network.xml`, in particular, I have changed the line `<LocalNetworkSubnets />` to:
+```
+  <LocalNetworkSubnets>
+    <string>127.0.0.1/8</string>
+    <string>10.0.0.0/8</string>
+    <string>172.16.0.0/12</string>
+    <string>192.168.0.0/16</string>
+    <string>100.64.0.0/10</string>
+  </LocalNetworkSubnets>
+```
+To apply the changes, I restard Jellyfin:
+```
+sudo systemctl restart jellyfin
+```
+
+Then, when opening `http://100.104.237.106:8096`, I get the "Welcome to Jellyfin!" screen 
+and the setup guide for my server.
+Again, during the setup, I have left the "Allow remove access" option unchecked (so not allowed).
+Now, after clicking "Finish", I get a "Please sign in" screen and I can log in.
+I can also log in using the Jellyfin app on my phone.
