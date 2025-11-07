@@ -984,3 +984,16 @@ as described in the [Jellyfin docs](https://jellyfin.org/docs/general/server/med
 
 The CPU temperature of my server does not increase when playing the videos.
 
+I have installed the following plugins for Jellyfin:
+- AniDB
+- AudioDB
+- Fanart
+- MusicBrainz
+- OMDb
+- Playback Reporting
+- Studio Images
+- TheTVDB
+- TMDb
+
+I have added a new TV show and the cover image was shown without any configuration.
+I have used the `imdbid-...` tag in the name of the TV show.
