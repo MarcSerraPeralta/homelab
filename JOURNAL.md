@@ -939,3 +939,48 @@ and the setup guide for my server.
 Again, during the setup, I have left the "Allow remove access" option unchecked (so not allowed).
 Now, after clicking "Finish", I get a "Please sign in" screen and I can log in.
 I can also log in using the Jellyfin app on my phone.
+
+
+# 2025/11/07 - Adding media to Jellyfin
+
+From the [Jellyfin documentation](https://jellyfin.org/docs/general/clients/codec-support/), 
+the best native supported codec is H.264 8Bit, 
+which does not require the server to transcode the media format on the fly when media gets played.
+This is good to reduce the stress and power consumption in the server.
+A command to convert any video format to H.264 8Bit is:
+```
+ffmpeg -i input_video.ext -c:v libx264 -pix_fmt yuv420p -preset slow -crf 23 -c:a copy output_video.mp4
+```
+To check if a video is in H.264 8Bit format, run:
+```
+ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,pix_fmt -of default=nw=1 movie_h264.mp4
+```
+and should see the following output:
+```
+codec_name=h264
+pix_fmt=yuv420p
+```
+
+I can do the transcoding in my laptop, which has better hardware and then copy the files to the server with:
+```
+rsync -avhP --progress /path/to/converted/videos/ marc@100.104.237.106:/srv/jellyfin
+```
+I hav added my user as owner of the jellyfin directory:
+```
+sudo chown -R marc:marc /srv/jellyfin/
+```
+because, if not, one requires `sudo` priviledges to copy the files.
+I can do this because this is a home server and I am only giving my user access to the jellyfin directory,
+which only stores movies and shows that I want to watch.
+
+To check that everything works correctly, 
+- I have donwloaded some Public Domain media from `archive.org`
+(which I have checked that have a correct entry in `imdb.com`).
+- I have converted the files to H.264 8Bit using the previous command 
+and checked that they have the correct encoding.
+- Because I have downloaded some shows, I will copy them to `/srv/jellyfin/Shows/"{Series Name} ({year})"/"Season {n}"/`
+as described in the [Jellyfin docs](https://jellyfin.org/docs/general/server/media/shows/).
+- I have added the Library to my Jellyfin server
+
+The CPU temperature of my server does not increase when playing the videos.
+
