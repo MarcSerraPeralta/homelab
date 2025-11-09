@@ -997,3 +997,53 @@ I have installed the following plugins for Jellyfin:
 
 I have added a new TV show and the cover image was shown without any configuration.
 I have used the `imdbid-...` tag in the name of the TV show.
+
+
+# 2025/11/09 - Setting up Caddy (reverse proxy) (part 1)
+
+I have installed Caddy to use as a reverse proxy:
+```
+sudo apt install caddy
+```
+Then I have added to the Caddyfile in `/etc/caddy/Caddyfile` the following:
+```
+:8080 {
+        # Set this path to your site's directory.
+        root * /usr/share/caddy
+
+        # Enable the static file server.
+        file_server
+
+        # Another common task is to set up a reverse proxy:
+        #reverse_proxy localhost:2283
+
+        # Or serve a PHP site through php-fpm:
+        # php_fastcgi localhost:9000
+}
+
+# Refer to the Caddy docs for more information:
+# https://caddyserver.com/docs/caddyfile
+
+http://pihole.local:8080 {
+        reverse_proxy 100.104.237.106:80
+}
+
+http://immich.local:8080 {
+        reverse_proxy 100.104.237.106:2283
+}
+
+http://jellyfin.local:8080 {
+        reverse_proxy 100.104.237.106:8096
+}
+```
+where I have changed the default Caddy port from `80` to `8080` because it was overlapping with pi-hole's port.
+
+I have added the `X.local` websites in the local DNS table of the pi-hole using the WebUI.
+I have also allowed port 8080 in the firewall:
+```
+sudo ufw allow 8080/tcp
+sudo ufw reload
+```
+
+There is a problem when reaching the `X.local` websites, 
+but I will continue debugging later.
