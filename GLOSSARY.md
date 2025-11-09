@@ -299,6 +299,8 @@ see section _IP routing, routing tbales, CIDR_ for more information of the outpu
 
 ### DNS in tailnet
 
+### Reverse and forward proxies
+
 ### TCP, UDP
 
 ### IP routing, routing tables, CIDR
