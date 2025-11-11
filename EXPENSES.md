@@ -4,3 +4,4 @@
 | 2025/10/25  | MDF pane 1220x620x12 mm          | Server enclosure |        7.90 |     |
 | 2025/10/25  | Nails (300 units)          | Server enclosure |        6.20 | Just needed ~20    |
 | 2025/10/25  | Ethernet cable          |  |        8.95 | To connect server to router    |
+| 2025/11/11  | ProtonVPN Plus 1-year subscription          | VPN |        11.96 | 70% off for Black Friday + shared with 2 friends    |
