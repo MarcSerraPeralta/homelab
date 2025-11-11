@@ -1047,3 +1047,23 @@ sudo ufw reload
 
 There is a problem when reaching the `X.local` websites, 
 but I will continue debugging later.
+
+
+# 2025/11/11 - Setting up Caddy (reverse proxy) (part 2)
+
+I have run test to check what is going wrong:
+
+1. Running `curl -v http://192.168.0.50:8080` from a different LAN device returns an HTTP response
+1. Running `curl -v http://localhost:8080` inside the server returns:
+```
+HTTP 502 Bad Gateway
+```
+
+After some debugging, I have realized that `.local` is used for something called `mDNS`.
+If I just change all the names to `X.home`, then everything works correctly.
+Note that for pi-hole, one needs to use `http://pihole.immich:8080/admin`.
+
+Currently everything works if I use `:8080` port for caddy (because pi-hole uses port 80).
+I do not want to type 8080 in the website name to access the websites.
+One solution would be to edit pi-hole's config and forward hostnames `X.home` to Caddy (in port 8080).
+
