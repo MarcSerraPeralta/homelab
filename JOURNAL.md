@@ -1067,3 +1067,74 @@ Currently everything works if I use `:8080` port for caddy (because pi-hole uses
 I do not want to type 8080 in the website name to access the websites.
 One solution would be to edit pi-hole's config and forward hostnames `X.home` to Caddy (in port 8080).
 
+
+# 2025/11/12 - Setting up Caddy (reverse proxy) (part 3)
+
+I have done some research and now I understand the problem with Caddy and Pi-hole for port 80.
+
+Pi-hole actually implements two things:
+- DNS server for the ad blocking (`pihole-FTL`)
+- web server (using port 80 HTTP/S) so that the admin panel can be "served" in the browser 
+(i.e. one does not have to use the terminal to check the status of the pi-hole DNS server)
+
+Pi-hole's web server uses lighttpd, which is capable of reverse proxying.
+However, I want to use Caddy, because it is much easier to configure and it has HTTPS by default.
+
+The problem is that I am trying to install Caddy when lighttpd is already installed and running.
+They are both web servers and ideally should listen to port 80, but they cannot do it at the same time.
+I have this problem because I am running both pi-hole and Caddy on the same PC.
+
+The solution is to remove lighttpd and configure Caddy to serve the admin panel for the pi-hole.
+Thus I will only have Caddy installed and it will be able to listen to port 80 without any conflict.
+I can then use Caddy as my reverse proxy for all my other applications (e.g. jellyfin, immich...).
+The only thing I need to ensure is that Caddy has the dependencies to run the PHP website of pi-hole 
+(check this [forum post](https://caddy.community/t/using-caddy-instead-of-lighttpd-with-pi-hole/8087)).
+
+Now, I am going to implement the solution from the forum post:
+```
+service lighttpd stop
+sudo apt install php8.3-fpm   
+sudo systemctl enable php8.3-fpm
+sudo systemctl start php8.3-fpm
+```
+Then I edit the contents of the Caddyfile with `sudo vim /etc/caddy/Caddyfile` and change them to:
+```
+http://pihole.home {                                                                                                             
+    root * /var/www/html
+    php_fastcgi unix//run/php/php8.3-fpm.sock
+    file_server
+}
+```
+Finally, 
+```
+sudo systemctl stop caddy
+sudo systemctl start caddy
+```
+So this was not all of it, because `pihole-FTL` is also using port 80.
+However, this can be easily solved because `pihole-FTL` is only using this port to show a
+blocking page message, but it can be disabled.
+I will change it by switching the blocking mode to `NULL`, 
+so that it returns a NULL result instead of a page when blocking.
+```
+sudo pihole-FTL --config dns.blocking.mode NULL
+sudo systemctl stop pihole-FTL # frees port 80
+sudo systemctl start caddy # takes port 80
+sudo systemctl start pihole-FTL # does not throw an error if it cannot access port 80
+```
+Pi-hole uses port 53 for the DNS server.
+In its config file, it says `80o` which means that port 80 is optional (for the web server).
+
+I seems that now there is no problem with the ports, 
+but now the pihole admin page is empty (`http://pihole.home/admin` nor `http://100.104.237.106/admin`).
+
+The problem is that pihole verion 6 uses `.lp` files (which are lighttpd script files)
+and not `.php` files. Therefore, it is not possible to use Caddy+php to render the website.
+
+This is the solution that I now have in mind:
+- Caddy to handle all normal sites (like immich.home, jellyfin.home, etc.) on port 80/443
+- Lighttpd to stay installed only for Pi-hole’s admin panel, but listening on port 8001 
+
+This way there's no port conflict, and I can make Caddy reverse-proxy to lighttpd so that 
+I can just visit `http://pihole.home` (without the :8001).
+
+I will continue configuring Caddy+pihole another day.
