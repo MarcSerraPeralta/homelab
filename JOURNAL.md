@@ -239,32 +239,45 @@ sudo tailscale down
 sudo tailscale up --accept-dns=false
 ```
 following the steps in [this post](https://fullmetalbrackets.com/blog/pihole-anywhere-tailscale/#set-up-tailscale).
-The reason for doing that is because our server will now also act as a DNS resolver for both the tailnet and the local network (because it will have pi-hole in it).
+The reason for doing that is because our server will now also act as a DNS resolver 
+for both the tailnet and the local network (because it will have pi-hole in it).
 The flag is to avoid a 'recursive loop' (more info in the [Tailscale docs](https://tailscale.com/kb/1072/client-preferences#use-tailscale-dns-settings)),
 which I will explain now.
-First note that the device with the pi-hole acts as both a DNS server for clients and a DNS client (e.g. when searching `google.com` inside the device or doing `apt update`).
-The recursion occurs when the device acts as a client, because when it tries to ask "What is the IP of `google.com`" to the DNS resolver it is basically asking itself "What is the IP og `google.com`" because it is the DNS resolver. 
-This ends in a recursion loop. This happens in both the tailnet and local network as each one has their own different DNS resolver. 
+First note that the device with the pi-hole acts as both a DNS server for clients and a DNS client 
+(e.g. when searching `google.com` inside the device or doing `apt update`).
+The recursion occurs when the device acts as a client, because when it tries to ask 
+"What is the IP of `google.com`" to the DNS resolver it is basically asking itself 
+"What is the IP og `google.com`" because it is the DNS resolver. 
+This ends in a recursion loop. 
+This happens in both the tailnet and local network as each one has their own different DNS resolver. 
 
-For the local network, this can be solved by setting the resolver of the device hosting pi-hole to an external DNS like 8.8.8.8 (Google). 
+For the local network, this can be solved by setting the resolver of the device hosting pi-hole 
+to an external DNS like 8.8.8.8 (Google). 
 Then, device knows that if it needs to act as a DNS client, it should look at the external DNS.
 
-For the tailnet, one also needs to use the flag `--assign-dns=false` to ensure Tailscale doesn’t overwrite the DNS settings of the device with pi-hole from the previous paragraph with the device's own IP (leading to the mentioned recursion).
+For the tailnet, one also needs to use the flag `--assign-dns=false` to ensure Tailscale 
+doesn’t overwrite the DNS settings of the device with pi-hole from the previous paragraph 
+with the device's own IP (leading to the mentioned recursion).
 
 Therefore, 
-- before installing pi-hole into my server, I will turn off tailnet so that first I only have to deal with the local network.
-- while installing pi-hole into my server, I need to make sure to make sure to set up an external DNS (this is to avoid the recursion in my local network)
-- after installing pi-hole into my server, I need to turn on tailscale with `--assign-dns=false` (to avoid the recursion in my tailnet)
+- before installing pi-hole into my server, 
+I will turn off tailnet so that first I only have to deal with the local network.
+- while installing pi-hole into my server, 
+I need to make sure to make sure to set up an external DNS (this is to avoid the recursion in my local network)
+- after installing pi-hole into my server, 
+I need to turn on tailscale with `--assign-dns=false` (to avoid the recursion in my tailnet)
 
 # 2025/10/09 - Installing Pi-hole
 
-Now that I know what is the correct way of setting up the pi-hole (see notes from 2025/10/08), I will install pi-hole on my server.
+Now that I know what is the correct way of setting up the pi-hole (see notes from 2025/10/08), 
+I will install pi-hole on my server.
 First, I made sure that Tailscale was down:
 ```
 sudo tailscale down
 sudo tailscale status
 ```
-As a side comment, Tailscale was up when I booted the server, so I am going to close the corresponding GitHub issue (maybe last time I had it down before reboot so it stayed down).
+As a side comment, Tailscale was up when I booted the server, so I am going to close the corresponding GitHub issue 
+(maybe last time I had it down before reboot so it stayed down).
 The issue about the keyboard still persists.
 
 Then, I followed the guide from the [pi-hole docs](https://docs.pi-hole.net/main/basic-install/).
@@ -273,8 +286,10 @@ Then, I followed the guide from the [pi-hole docs](https://docs.pi-hole.net/main
 I choose `eno1` (which is the local network) because I can then configure Tailscale to use my server as DNS.
 - For the upstream DNS provider, I chose `Cloudflare` because it does not store as much log info as Google.
 - I included StevenBlack's unified hosts list.
-- Regarding query logging, I have enabled it to check that everything works fine at the beginning, but I will most likely disable it afterwards.
- have also selected `Show everything` as privacy mode for FTL to check that everything works, but then I will turn it down to `Hide domains and clients` or `Anonymous mode`.
+- Regarding query logging, I have enabled it to check that everything works fine at the beginning, 
+but I will most likely disable it afterwards.
+- I have also selected `Show everything` as privacy mode for FTL to check that everything works, 
+but then I will turn it down to `Hide domains and clients` or `Anonymous mode`.
 
 To check that the installation has been successful, I check that pi-hole is active:
 ```
@@ -340,8 +355,8 @@ I have installed pi-hole with sudo:
 curl -sSL https://install.pi-hole.net | sudo bash
 ```
 Now, when I try to go to the provided website, I don't get a timeout error, I get a "403 Forbidden Error".
-The problem is that lighttdp is using port 80 so pihole cannot use it (`sudo ss -tulnp`).
-I just disabled lighttdp and restarted pihole-FTL:
+The problem is that lighttpd is using port 80 so pihole cannot use it (`sudo ss -tulnp`).
+I just disabled lighttpd and restarted pihole-FTL:
 ```
 sudo systemctl stop lighttpd
 sudo systemctl disable lighttpd
@@ -354,7 +369,7 @@ What I believe the actual problem was:
 - I did not look at the prerequisites and didn't have the correct ufw setup
 - maybe I required to do `sudo bash` when installing Pi-hole
 
-I will not uninstall lighttdp, I will just keep it disabled.
+I will not uninstall lighttpd, I will just keep it disabled.
 
 First thing now to do is to change the pi-hole password:
 ```
@@ -377,8 +392,10 @@ ping google.com
 ```
 which works.
 Then, to configure the Tailnet DNS, I follow the guide in [this Tailscale post](https://tailscale.com/kb/1114/pi-hole#step-4-set-raspberry-pi-as-the-dns-server-for-your-tailnet).
-There is one important thing to do so that pi-hole can be the DNS for tailnet: one needs to select "Permit all origins" so that requests from the tailnet are also answered.
-By default, pi-hole only listens to local requests (i.e. from the local network), but we also want it to answer requests from the tailnet.
+There is one important thing to do so that pi-hole can be the DNS for tailnet: 
+one needs to select "Permit all origins" so that requests from the tailnet are also answered.
+By default, pi-hole only listens to local requests (i.e. from the local network), 
+but we also want it to answer requests from the tailnet.
 This can be done in the Web UI or in the terminal by editing `/etc/pihole/pihole.toml` and 
 changing `listeningMode = "LOCAL` to `listeningMode = "ALL"` (not that his varies dependning on the pi-hole version).
 Then, one needs to restart pi-hole:
@@ -1138,3 +1155,21 @@ This way there's no port conflict, and I can make Caddy reverse-proxy to lighttp
 I can just visit `http://pihole.home` (without the :8001).
 
 I will continue configuring Caddy+pihole another day.
+
+
+# 2025/11/13 - Setting up Caddy (reverse proxy) (part 4)
+
+I just realized that now pihole is not working correctly: it is not blocking the ads.
+Even after stoping caddy and restarting pihole (so that it can use port 80),
+the ad-blocking capabilities do not work. 
+Even if I start lighttpd it does not work.
+
+I have been reading my journal about my installation of pihole (2025/10/09).
+It is weird because I disabled lighttpd (although I believed that it is needed to render the WebUI).
+I have to research a little bit more about this, but I will probably do the following:
+- uninstall pihole and lighttpd (keep caddy installed)
+- make caddy listen to port 80 (for HTTP(S) handling)
+- install pihole
+- set the pihole's websever to use to something that is not port 80 (used by caddy)
+- if needed, I will install lighttpd (although actually I believe it is not needed)
+
