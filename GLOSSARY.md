@@ -287,19 +287,54 @@ _Source: Wikipedia_
 ```
 sudo netstat -tulpen
 ```
+```
+sudo ss -tulpen
+```
 - routing table:
 ```
 ip route show
 ```
 see section _IP routing, routing tbales, CIDR_ for more information of the output.
 
+
 ### NAT transversal
 
 ### DNS
 
-### DNS in tailnet
+Definition:
+- _Domain Name System_ (_DNS_) _server_ or _resolver_ = translates/maps/resolves domain names to IP addresses.
+- _Domain name_ = unique human-readable address to identify web servers (e.g. `example.com`).
+- _Uniform Resource Locator_ (_URL_) = web address containing the domain name of a site as well as other information, 
+including the protocol and the path.
+For example, in the URL `https://cloudflare.com/learning/`:
+`cloudflare.com` is the domain name, `https` is the protocol, and `/learning/` is the path to a specific page on the website.
+- _Hostname_ = identifier (string) that is assigned to a device connected to a network.
+It can be a domain name if it has been appended to a DNS.
 
-### Reverse and forward proxies
+The DNS server is only used by the devices in a network to get the IP addresses of domain names.
+This means that the DNS does not handle web traffic itself, it is just a "lookup table".
+The devices talk to port 53 (reserved for DNS requests) of the DNS server using the TCP and UDP protocols
+(see _NAT_ section and _TCP, UDP_ section for more informaiton).
+
+A _DNS record_ is an pair/map of IP address and domain name.
+If the address is IPv4, the record type is `A`; while if the address is IPv6, the record type is `AAAA`.
+
+When setting up a home DNS server, it will not store all the possible mappings of IP addresses and domain names.
+The home DNS server will end up asking DNS servers in the internet that actually hold the DNS records (known _as authoritative DNS servers_).
+The type of DNS server that asks to other DNS servers is known as _recursive DNS server_.
+
+![Alt text](./glossary_media/dns_record_request_sequence_recursive_resolver.png?raw=true)
+![Alt text](./glossary_media/dns_hierarchy.png?raw=true)
+_Images from [Cloudflare learning](https://www.cloudflare.com/learning/dns/what-is-dns/)._
+
+It is important that the home DNS server is not its own DNS root nameserver, 
+to avoid getting stuck in an infinite loop where the home DNS server just continues asking itself "What is the IP address of `google.com`?".
+To solve this, one can just specify the DNS root nameserver of the home DNS server to be e.g. the one from Google or Cloudflare.
+
+_Source: Wikipedia and Cloudflare learning_
+
+
+### Reverse proxies
 
 ### TCP, UDP
 
