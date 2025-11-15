@@ -1173,3 +1173,17 @@ I have to research a little bit more about this, but I will probably do the foll
 - set the pihole's websever to use to something that is not port 80 (used by caddy)
 - if needed, I will install lighttpd (although actually I believe it is not needed)
 
+First,
+```
+sudo apt remove lighttpd
+sudo pihole uninstall
+```
+Afterwards, I had to change back the DNS settings for the LAN (in the router) and the tailnet.
+I have also reinstalled caddy:
+```
+sudo apt remove caddy
+sudo apt install caddy
+```
+So, I made a mistake because the change in the router's DNS only gets applied after rebooting the router.
+Currently, I am not at home so I cannot reboot it.
+Because of that, I cannot run `sudo apt install caddy` because `apt` cannot correctly resolve the hostnames.
