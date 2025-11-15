@@ -35,12 +35,14 @@ I am following these steps to install Ubuntu Server:
 1. Once the PC is back on, select the option `Try and Install Ubuntu Server`.
 1. It will take quite some time to set up Ubuntu Server and start the installation guide.
 1. Go over the installation steps.
-    1. The network configuration is more tricky than I expected. Because I dont have time now, I have cancelled the installation and will continue another day.
+    1. The network configuration is more tricky than I expected. Because I dont have time now, 
+    I have cancelled the installation and will continue another day.
 
 # 2025/10/07 - Setting up new home server (Part 2)
 
 I have done some research about the network configuration. 
-I will set both IPv4 and IPv6 to automatic (DHCP = Dynamic Host Configuration Protocol), which means that the router assigns a random IP address whenever the router or the PC/server gets rebooted. 
+I will set both IPv4 and IPv6 to automatic (DHCP = Dynamic Host Configuration Protocol), 
+which means that the router assigns a random IP address whenever the router or the PC/server gets rebooted. 
 I can always set up a static IP address for the server later on (this can be done at the server side or at the router side). 
 
 Continuing with the Ubuntu Server installation:
@@ -59,7 +61,8 @@ As it will be easy to resize partitions (because of LVM), I will leave the LV as
 
 After this, the installation has started (it only took a couple of minutes).
 Then, I reboot the PC (it asks me to remove the USB stick and then press `Enter`). 
-The PC has rebooted without issues. I log in with my new username (specified in the `myserver login:` field) and my new password.
+The PC has rebooted without issues. I log in with my new username (specified in the `myserver login:` field) 
+and my new password.
 
 Fist thing is to check that my server is connected to the internet:
 ```
@@ -140,7 +143,8 @@ Next thing I did was disabling key expiry for `myserver`.
 I have also disabled UPnP in my router, as recommended by Tailscale and other sources in the internet.
 I have also checked that I do not have any open ports (they are listed in `Forwarding > Virtual Servers`).
 
-Finally (for now), I will set `myserver` as an exit node, so that all my web traffic can go through my home internet (if I am not at home).
+Finally (for now), I will set `myserver` as an exit node, so that all my web traffic can go through my home internet 
+(if I am not at home).
 ```
 sudo tailscale down
 sudo tailscale up --advertise-exit-node
@@ -164,12 +168,14 @@ and test that it worked:
 sudo /etc/networkd-dispatcher/routable.d/50-tailscale
 test $? -eq 0 || echo 'An error occurred.'
 ```
-which worked. I repeated the commands to set Tailscale down and back up as an exit node, and now I get the following warning:
+which worked. 
+I repeated the commands to set Tailscale down and back up as an exit node, and now I get the following warning:
 ```
 Warning: IP forwarding is disabled, subnet routing/exit nodes will not work.
 See https://tailscale.com/s/ip-forwarding
 ```
-The guide that I will be following is [https://tailscale.com/kb/1103/exit-nodes](https://tailscale.com/kb/1103/exit-nodes), which seems more appropiate to set up exit nodes.
+The guide that I will be following is [https://tailscale.com/kb/1103/exit-nodes](https://tailscale.com/kb/1103/exit-nodes), 
+which seems more appropiate to set up exit nodes.
 OK, so the exit-node guide refer to the one in the warning about the IP forwarding.
 
 I have checked that my server has `ufw` (Uncomplicated Firewall) but it is disabled.
@@ -195,7 +201,8 @@ does not show any warning.
 Finally, I went to the admin console of Tailscale, opened the Machines page, and allowed `myserver` to be an exit node.
 Using my phone, I checked that I can connect to the exit node of my server (with Wifi disabled).
 
-Final comment, I have tried SSHing to `myserver` when UFW denies SSH and it still works from my laptop, so I am just going to keep SSH denied.
+Final comment, I have tried SSHing to `myserver` when UFW denies SSH and it still works from my laptop, 
+so I am just going to keep SSH denied.
 I have also rebooted the server to check that all the configuration has not changed and that the exit node still works.
 
 
@@ -421,10 +428,12 @@ Remeber to run `sudo pihole -g` after updating the ad lists.
 
 I have changed the logging settings of the pi-hole.
 In the pi-hole web UI, go to Settings > Privacy. 
-Select "Expert mode" (click on the "Basic" toggle) and set the Query Anonymization to "Hide domains: Display and store all domains as hidden".
+Select "Expert mode" (click on the "Basic" toggle) and set the Query Anonymization to 
+"Hide domains: Display and store all domains as hidden".
 This means that the domains are not stored and cannot be seen, which improves the privacy. 
 
-By default, pi-hole only stores the logs for up to 91 days (see `maxDBdays` in `/etc/pihole/pihole.toml`), which is good for storage purposes.
+By default, pi-hole only stores the logs for up to 91 days (see `maxDBdays` in `/etc/pihole/pihole.toml`), 
+which is good for storage purposes.
 I will leave it like this.
 
 
@@ -438,14 +447,16 @@ I could change it to the default one, but what is the point of using the tailnet
 I have also made the router use only WPA2 for wireless security (before it was using both WPA2 and WPA, which is not super secure).
 
 I have also tested the tailnet's internet speed between two countries (Spain - Netherlands) and I obtained ~80 Mbps.
-The bandwidth of my spanish WiFi is 600 Mbps and the cause of the tailnet bandwidth being 80 Mbps is that my dutch internet speed is 80 Mbps.
+The bandwidth of my spanish WiFi is 600 Mbps and the cause of the tailnet bandwidth being 80 Mbps 
+is that my dutch internet speed is 80 Mbps.
 
 
 # 2025/10/12 - Share my server with other people
 
 I have shared my server (which I turned on) with my girlfriend so that she can also block the ads with pi-hole. 
 This can be done following the instructions in the [Tailscale docs](https://tailscale.com/kb/1084/sharing). 
-Note that "sharing" is not the same as inviting someone to your whole tailnet; here I am just making my server available to my girlfriend's tailnet. 
+Note that "sharing" is not the same as inviting someone to your whole tailnet; 
+here I am just making my server available to my girlfriend's tailnet. 
 For example, she cannot see my phone or my laptop when they are connected to my tailnet. 
 After configuring her tailnet to use my server as DNS provider, she can have an (almost-)free-ad experience in her phone. 
 
@@ -481,13 +492,16 @@ which runs correctly and I can also visit `http://192.168.0.1/`.
 
 I have been working on the bad USB connection, trying to debug the cause.
 The issue is very strange, here are my findings:
-- the following things happen with both my keyboard and my mouse in both USB 2.0 and 3.0, thus it is not to a device nor USB type
+- the following things happen with both my keyboard and my mouse in both USB 2.0 and 3.0, 
+thus it is not to a device nor USB type
 - when being in the login page, right after plugging the keyboard, 
 I get the error -110 and the things I type are not registered in the terminal 
 (which initially made me believe that there was a problem with the USB connections)
-- if the keyboard is plugged in before boot, I see the error -110 in the log during boot, but then in the login page, the keyboard works and I can log in.
+- if the keyboard is plugged in before boot, I see the error -110 in the log during boot, 
+but then in the login page, the keyboard works and I can log in.
 - when being in the login page, if I plug the keyboard and wait a little bit (~5-10 seconds), 
-the PC tries to connect again and again to the keyboard until it succeeds (and correctly displays the name and brand of the keyboard in the logs).
+the PC tries to connect again and again to the keyboard until it succeeds 
+(and correctly displays the name and brand of the keyboard in the logs).
 - if I have the keyboard plugged in and correctly working, plugging in the mouse works almost immediately (same vice-versa).
 
 Seeing this, I believe that the "problem" is not actually a problem and more like a "slow process" 
@@ -498,7 +512,8 @@ I will close the corresponding issue in GitHub about this problem.
 
 # 2025/10/23 - Mitigating fan noise
 
-Before doing anything about the fan noise, I measured how bad it is with the microphone of my smartphone (results may not be precise):
+Before doing anything about the fan noise, I measured how bad it is with the microphone of my smartphone 
+(results may not be precise):
 - background (server turned off): 40-42 dB
 - server on and mic at 30cm from it: 45 dB
 - server on and mic at 1cm from it: 50 dB
@@ -509,9 +524,11 @@ I just slightly bended one of the top aluminum pieces and was enough to remove t
 I have cleaned the fans (disassembled) and the CPU cooler (without disassembling it) using some toilet paper.
 The cleaning did not reduce that much the noise from my server (which only comes from the fans).
 
-The other thing I wanted to do is to adapt the fan curve so that the fans are not spinning if the CPU does not reach a certain temperature.
+The other thing I wanted to do is to adapt the fan curve so that the fans are not spinning 
+if the CPU does not reach a certain temperature.
 This (in theory) can be done both from the BIOS and the OS.
-I did not have luck in the BIOS because the only setting I can change about the fans is their "idle mode", which was already set to the minimum (see `journal_media`).
+I did not have luck in the BIOS because the only setting I can change about the fans is their "idle mode", 
+which was already set to the minimum (see `journal_media`).
 In the OS, I did not have any luck either because I believe that the PWM of the fans is not exposed to the OS level.
 
 As none of the two options worked, I searched more solutions. 
@@ -535,7 +552,8 @@ I have attached a schematic and pictures in `journal_media`.
 The design is very close to the one from [this video](https://www.youtube.com/watch?v=j8IYsQ6QVp8).
 
 The server is now set up inside the enclosure and I cannot hear the fan noise.
-In fact, I can hear more the fridge from my kitchen (one closed door away) than the server (although my fridge is kinda noisy for a fridge).
+In fact, I can hear more the fridge from my kitchen (one closed door away) than the server 
+(although my fridge is kinda noisy for a fridge).
 Therefore, I will not buy any acoustic foam to further dampen the noise from the fans.
 
 I have been tracking the temperature of the CPU using this script:
@@ -595,7 +613,8 @@ I can now check my grafana locally (in my laptop) in: http://myserver:3000
 The initial credentials are `user: admin` and `password: admin`. 
 Grafana tells you to update the password so I did.
 
-Following the instructions on [the docs](https://grafana.com/blog/2025/02/05/how-to-visualize-csv-data-with-grafana/) on how to load CSV data on Grafana,
+Following the instructions on [the docs](https://grafana.com/blog/2025/02/05/how-to-visualize-csv-data-with-grafana/) 
+on how to load CSV data on Grafana,
 I have installed the `Infinity` data source with
 ```
 grafana-cli plugins install yesoreyeram-infinity-datasource
@@ -606,7 +625,8 @@ sudo systemctl restart grafana-server
 ```
 Then, I went to `Connections > Data sources` inside Grafana's local website and clicked on `Infiinity`.
 OK, so this data source is only able to load CSV files from HTTP requests.
-I have added a small snipped that serves my recorded monitoring data for HTTP requests in `/etc/systemd/system/monitoring-data-http.service`.
+I have added a small snipped that serves my recorded monitoring data for HTTP requests in 
+`/etc/systemd/system/monitoring-data-http.service`.
 ```
 [Unit]
 Description=HTTP server for the monitoring data
@@ -656,7 +676,8 @@ I have clicked on `Test` and I correctly receive a notification email.
 I have changed the script so that the CPU temperatures get sampled every 10 seconds.
 I have also disabled the data from temp_zone0 and temp_zone1 because they are static and do not change.
 There is a "bug" in Grafana that it does not know that Europe is in "winter time" so that the time is shifted +1h.
-I have tried connecting the dashboard to the Grafana app in my phone but I can only do the login via HTTP (not HTTPS as the app wants),
+I have tried connecting the dashboard to the Grafana app in my phone but I can only do the login via HTTP 
+(not HTTPS as the app wants),
 therefore I have just added a shortcut to the webpage in the home page of my phone.
 
 To really test that everything works, I am going to stress the computer and rise its CPU temperature using:
@@ -811,7 +832,8 @@ I will buy the following:
 - mSATA SSD of 256GB for the OS + Immich phone backup + maybe some documents [~30€]
 - SATA 2.5inch SSD of 1TB for the media, documents, backup of ThinkPad, archive of emails, media center... [~60€]
 
-In case I need more storage, I can always buy the slimline SATA adapter to SATA (in the shape of an optical bay) and another 1TB of 2.5inch SSD storage.
+In case I need more storage, I can always buy the slimline SATA adapter to SATA 
+(in the shape of an optical bay) and another 1TB of 2.5inch SSD storage.
 I can also buy an SSD of 2TB, although they start to be more pricey (60€ vs 120€).
 
 The reason for using SSDs instead of HDDs is that the "NAS" HDDs are 3.5inch and cannot be mounted in my server. 
@@ -819,9 +841,11 @@ Also, my father has been running the same 1TB SSDs in the family NAS for several
 
 For the backup of the cluster, I will use the 512GB and 1TB HDDs that I already have for media and backups.
 
-Regarding the storage for the media center, I plan on only storing the current series that I am watching or movies that I want to watch.
+Regarding the storage for the media center, I plan on only storing the current series 
+that I am watching or movies that I want to watch.
 I don't plan on having a huge library nor movies or series at 4K resolution.
-I will probably have 400GB of storage for the media center. One hour of 1080p or 1440p video takes 2GB-5GB of space, therefore I will be able to store ~100 hours of playtime.
+I will probably have 400GB of storage for the media center. 
+One hour of 1080p or 1440p video takes 2GB-5GB of space, therefore I will be able to store ~100 hours of playtime.
 This is plenty enough to store a couple of seasons of the TV shows that I am watching, which is perfect for me.
 
 
@@ -891,7 +915,8 @@ I will try to play with the home server and install as many things as I can so t
 First I will start with Jellyfin (for media center).
 I am following the installation guide for bare metal from [its documentation](https://jellyfin.org/docs/general/installation/linux/).
 During the setup, I have disabled "Allow remote connections to this server" because I already have Tailscale.
-Because I have disabled the remove access, then I need to access jellyfin on my browser using the tailnet IP (jellyfin uses port 8096).
+Because I have disabled the remove access, 
+then I need to access jellyfin on my browser using the tailnet IP (jellyfin uses port 8096).
 This is a little bit described in the [Jellyfin docs](https://jellyfin.org/docs/general/post-install/networking/tailscale).
 I am having problems with accessing the Jellyfin server.
 I will continue debugging another day.
