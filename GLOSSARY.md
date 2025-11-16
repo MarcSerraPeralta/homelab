@@ -294,7 +294,7 @@ sudo ss -tulpen
 ```
 ip route show
 ```
-see section _IP routing, routing tbales, CIDR_ for more information of the output.
+see section _IP routing, routing tables, CIDR_ for more information of the output.
 
 
 ### NAT transversal
@@ -334,7 +334,48 @@ To solve this, one can just specify the DNS root nameserver of the home DNS serv
 _Source: Wikipedia and Cloudflare learning_
 
 
+### Web servers
+
+Definition:
+- _Web server_ = stores website files and sends them to the users.
+
+Web servers listen to HTTP and HTTPS requests and then:
+- returns the appropiate HTML files = _static file serving_
+
+or
+- passes requests to applications (e.g. Go, Python) = _application hosting_
+
+Usually, web servers sit behind a reverse proxy for several advantages (see _Reverse proxies_ section).
+
+_Source: Wikipedia and Cloudflare learning_
+
+
 ### Reverse proxies
+
+Definition:
+- _Reverse proxy_ = server that sits in front of web servers and
+and forwards clients requests to the appropiate services of those servers.
+
+![Alt text](./glossary_media/reverse_proxy.png?raw=true)
+
+Reverse proxies are used for increased security, load balancing, routing, filtering, reliability...
+They can handle HTTP, HTTPS, TCP... protocols 
+and forward client requests to specific ports of web servers.
+In particular, the steps involved in forwarding client requests inside a reverse proxy are the following:
+1. Accepts a web request from a client
+1. Decides which (backend) service (defined by `IP:port`) should handle it
+1. Sends the request there
+1. Returns the response to the client
+
+Usually, the IP returned by the DNS is a reverse proxy that handles everything.
+As an example, if the client searches for `example.com/blog`:
+1. DNS returns the IP address associated with `example.com` (here we assume this IP address is a reverse proxy)
+1. the `/blog` web request is sent to the reverse proxy
+1. the reverse proxy asks to the "blogs" service (which has an associated `IP:port`)
+1. the reverse proxy sends the answer to the client
+
+_Source: Wikipedia and Cloudflare learning_
+
 
 ### TCP, UDP
 
@@ -395,6 +436,59 @@ _Sources: Wikipedia_
 ### `systemd` services and timers
 
 ### Updates and reboot
+
+### Software
+
+#### Caddy
+
+Web server that is very easy to configure and that has lots of features:
+
+- reverse proxy
+```
+example.com {
+    reverse_proxy IP:port
+}
+```
+- static file server (web server)
+```
+example.com {
+    root * /path/to/html/files
+    file_server
+}
+```
+- URL rewriting
+```
+example.com {
+    @root path /
+    rewrite @root /admin
+```
+_when the request's path is `/`, rewrite it internally to `/admin`. 
+The URL stays `/` (no redirect)_
+- TLS certificates (own CA handled automatically)
+```
+example.com {
+    tls internal
+}
+```
+
+#### Pihole (v6)
+
+Pihole is a DNS that blocks ads by not returning the IP if the hostname is in an "ad list".
+Therefore, it blocks (almost) all ads network wise.
+It has a web interface to monitor and configure everything.
+
+Pihole v6 has the web interface and the REST API embedded directly into `pihole-FTL` (which handles the DNS requests),
+thus it does not depend on `lighttpd` nor `PHP`. It has native HTTPS support.
+The configuration is done using the `pihole.toml` file.
+
+The DNS uses port 53 (cannot be changed) and the web interface uses ports 80 and 443 (these can be changed).
+If one wants to use a reverse proxy in the same machine that runs pihole, then the reverse proxy should use port 80 and 443
+(to listen to all HTTP and HTTPS requests) and pihole's web interface should be moved to other ports 
+(because pihole and the reverse proxy cannot use the same ports).
+These new ports can then be mapped by the reverse proxy to e.g. `pihole.home`.
+
+![Alt text](./glossary_media/pihole_and_reverse-proxy.png?raw=true)
+
 
 ## Docker
 
