@@ -1212,3 +1212,102 @@ sudo apt install caddy
 So, I made a mistake because the change in the router's DNS only gets applied after rebooting the router.
 Currently, I am not at home so I cannot reboot it.
 Because of that, I cannot run `sudo apt install caddy` because `apt` cannot correctly resolve the hostnames.
+
+
+# 2025/11/16 - Reinstalling pihole and caddy
+
+I have removed my home server as DNS in my router and I have reset the router to apply the changes.
+The server still cannot resolve the domain names (e.g. `ping google.com` does not work).
+I don't know what I have done because I turned tailscale down and I had some problems sshing to the server.
+I believe the problem was the flag `--accept-dns=false` in tailscale.
+Now I can do `ping google.com`.
+
+I want to do a fresh install of everything related to caddy and pihole, so I have uninstalled caddy, pihole, lighttpd...
+
+First, I have installed Caddy and checked that it is using port 80 and 443:
+```
+sudo apt install caddy
+sudo ss -tulpen | grep "caddy"
+```
+it is not, because the Caddyfile does not specify that I want caddy to listen to ports 80 and 443.
+I changed it (`sudo vim /etc/caddy/Caddyfile`) to:
+```
+i:80 {
+        # Set this path to your site's directory.
+        root * /usr/share/caddy
+
+        # Enable the static file server.
+        file_server
+
+        # Or serve a PHP site through php-fpm:
+        #php_fastcgi unix//run/php/php8.3-fpm.sock
+}
+
+:443 {
+        # Set this path to your site's directory.
+        root * /usr/share/caddy
+
+        # Enable the static file server.
+        file_server
+
+        # Or serve a PHP site through php-fpm:
+        #php_fastcgi unix//run/php/php8.3-fpm.sock
+}
+```
+and then restarted caddy:
+```
+sudo systemctl restart caddy
+sudo ss -tulpen | grep "caddy"
+```
+Now it uses ports 80 and 443.
+
+Secondly, I reinstall pihole:
+```
+curl -sSL https://install.pi-hole.net | sudo bash
+```
+I have set it up using the same options as I had before.
+I cannot access `192.168.0.50:80/admin` because I have Caddy running in port 80.
+I have checked (`sudo ss -tulpen`) and `pihole-FTL` is only using port 53 (for DNS requests).
+To access pihole's web UI, I edit its configuration file (`sudo vim /etc/pihole/pihole.toml`):
+```
+port = "8080o,80o,443os,[::]:80o,[::]:443os"
+```
+and then I restart `pihole-FTL` (I don't know if this is necessary):
+```
+sudo systemctl restart pihole-FTL
+sudo systemctl status pihole-FTL
+sudo ss -tulpen | grep "pihole"
+```
+Now I can see that `pihole-FTL` is using ports 53 and 8080.
+I can access pihole's web UI in `192.168.0.50:8080/admin`.
+It is also useful to change the pihole password using:
+```
+sudo pihole setpassword
+```
+
+Thirdly, let's check that I can use a custom domain name for pihole.
+1. make sure to add back again the home server as DNS server in the router.
+1. add `pihole.home` <-> `192.168.0.50` as record in the Local DNS section of pihole's Web UI.
+1. add the following to `/etc/caddy/Caddyfile`:
+```
+http://pihole.home {
+        @root path /
+        rewrite @root /admin
+
+        reverse_proxy 192.168.0.50:8080
+}
+```
+Now, I can access pihole's web UI using `http://pihole.home`.
+
+Finally, let's add my server back to my tailnet:
+```
+sudo tailscale up --accept-dns=false --advertise-exit-node --advertise-routes=192.168.0.0/24
+```
+
+Because I turned off tailscale in the server, I got an error from immich.
+I could solve it by just running:
+```
+cd /path/to/docker-compose/file
+docker compose down
+docker compose up -d
+```
