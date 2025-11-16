@@ -1311,3 +1311,15 @@ cd /path/to/docker-compose/file
 docker compose down
 docker compose up -d
 ```
+
+I have also added immich and jellyfin domain names in the local DNS of pihole,
+and also in `/etc/caddy/Caddyfile`:
+```
+http://jellyfin.home {
+        reverse_proxy 192.168.0.50:8096
+}
+
+http://immich.home {
+        reverse_proxy 100.104.237.106:2283
+}
+```
