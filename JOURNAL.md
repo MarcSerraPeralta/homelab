@@ -1323,3 +1323,76 @@ http://immich.home {
         reverse_proxy 100.104.237.106:2283
 }
 ```
+
+
+# 2025/11/17 - Caddy certificates for HTTPS
+
+I have changed the Caddyfile to create its own CA certificates:
+```
+http://pihole.home {
+        tls internal
+        @root path /
+        rewrite @root /admin
+
+        reverse_proxy 192.168.0.50:8080
+}
+
+http://jellyfin.home {
+        tls internal
+        reverse_proxy 192.168.0.50:8096
+}
+
+http://immich.home {
+        tls internal
+        reverse_proxy 100.104.237.106:2283
+}
+```
+The root certificate is in `/var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt`.
+I have downloaded the certificate to my local laptop using:
+```
+ssh -t marc@myserver "sudo cat /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt" > root.crt
+``` 
+To install the certificate in my Linux Mint, I run the following commands:
+```
+sudo mkdir /usr/local/share/ca-certificates/extra
+sudo cp root.crt /usr/local/share/ca-certificates/extra/root.crt
+sudo update-ca-certificates
+trust list # prints the installed certificates
+```
+Then, I have to load the certificate in Mozilla Firefox.
+Following the instructions in [issue #29](https://github.com/MarcSerraPeralta/homelab/issues/29),
+I have installed the certificate in Mozilla Firefox.
+However, when I type `https://pihole.home` I get a `Secure Connection Failed` error.
+Restarting Firefox does not seem to solve the problem.
+I have also installed the certificate in my phone, where I can use Google Chrome.
+I can't open the HTTPS version of the website.
+I was stupid because the Caddyfile only has the HTTP version of the websites.
+```
+pihole.home {
+        tls internal
+        @root path /
+        rewrite @root /admin
+
+        reverse_proxy 192.168.0.50:8080
+}
+
+
+jellyfin.home {
+        tls internal
+        reverse_proxy 192.168.0.50:8096
+}
+
+immich.home {
+        tls internal
+        reverse_proxy 100.104.237.106:2283
+}
+```
+For Firefox in Android, I had to follow the following steps:
+1. Install CA certificate (this is done in the phone "Configuration" app, so it varies depending in OS)
+1. Open Firefox
+1. Go to Settings → About Firefox.
+1. Tap the Firefox logo five times.
+1. Navigate to Settings → Secret Settings.
+1. Toggle Use third party CA certificates.
+
+Now all the HTTPS work (both in my laptop and phone, which both use Firefox).
