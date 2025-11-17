@@ -1396,3 +1396,7 @@ For Firefox in Android, I had to follow the following steps:
 1. Toggle Use third party CA certificates.
 
 Now all the HTTPS work (both in my laptop and phone, which both use Firefox).
+
+I have also added the grafana website link:
+1. Add `grafana.home` in the local DNS table
+1. Update the Caddyfile to do a reverse proxy to the correct port (port 3000)
