@@ -1400,3 +1400,82 @@ Now all the HTTPS work (both in my laptop and phone, which both use Firefox).
 I have also added the grafana website link:
 1. Add `grafana.home` in the local DNS table
 1. Update the Caddyfile to do a reverse proxy to the correct port (port 3000)
+
+
+# 2025/11/18 - qBitTorrent and ProtonVPN
+
+I want to set up my laptop to download torrents using qBitTorrent and ProtonVPN (to not expose my IP when torrenting).
+First, I install the ProtonVPN GUI for Ubuntu (because I am using Linux Mint) following the [ProtonVPN guide](https://protonvpn.com/support/official-linux-vpn-ubuntu/):
+```
+wget https://repo.protonvpn.com/debian/dists/stable/main/binary-all/protonvpn-stable-release_1.0.8_all.deb
+sudo dpkg -i ./protonvpn-stable-release_1.0.8_all.deb && sudo apt update
+sudo apt install proton-vpn-gnome-desktop
+```
+This commands didn't work. I get a `unable to locate package proton-vpn-gnome-desktop` error.
+I have found the following commands that actually work:
+```
+sudo apt purge ~nprotonvpn
+sudo apt autoremove
+sudo apt update
+sudo apt install gdebi
+sudo gdebi protonvpn-stable-release_1.0.8_all.deb
+sudo apt install proton-vpn-gnome-desktop
+```
+I have also installed the CLI version:
+```
+sudo apt install proton-vpn-cli
+```
+
+I have purchased Proton VPN Plus during black friday and I am sharing it with some friends,
+so it only costs me 1€/month. I have chosen Proton VPN because it has no logs policy (which has been verified)
+and because it is well reputated.
+
+I have installed qbittorrent following [its documentation](https://launchpad.net/~qbittorrent-team/+archive/ubuntu/qbittorrent-stable):
+```
+sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
+sudo apt update
+sudo apt install qbittorrent
+```
+Before activating ProtonVPN, I have run the check with `ipleak.net` described in [issue #31](https://github.com/MarcSerraPeralta/homelab/issues/31).
+If I do not have ProtonVPN activated, I get my IP address.
+If I activate ProtonVPN, I get three IP addresses, one of which is my IP address.
+If I bind qbittorrent to only use the VPN ([described here](https://protonvpn.com/support/bittorrent-vpn)), 
+then I do not see my IP address.
+If I do not have the VPN activated, then the download does not start because it does not have internet,
+which I can also see in `ipleak.net`.
+
+Looking through the settings in ProtonVPN GUI, I can see the following ones which I should investigate further:
+- Kill switch
+- Port forwarding
+
+Regarding the kill switch in the ProtonVPN GUI, I actually do not need to set it up globally
+because I already set up a kill switch in qbittorrent (when binding it to only use the VPN) [also see this post](https://www.ghacks.net/2016/03/23/qbittorrent-block-transfers-vpn-disconnect/).
+
+In the meantime, I have also enabled annonymous mode in qbittorrent (Tools > Settings > Bittorrent).
+I wanted qbittorrent to print my external IP address, but then I realized that I do not have the latest version 
+because I do not have the latest Linux Mint version.
+I need then to use flatpak:
+```
+sudo apt remove qubittorrent
+sudo apt autoremove
+flatpak install flathub org.qbittorrent.qBittorrent
+```
+Now I am running the newest version. I have run the same setup and checks as before.
+I have also added some dark theme (see `qbittorrent/`).
+The external IP shows the correct IP (i.e. the one from my VPN).
+When I am not connected via VPN, it shows `N/A`.
+
+Regarding `ipleak.net`, I can still see some entries in the DNS section comming from the Netherlands,
+although they come from North Holland and I am in South Holland. 
+First, I have disabled Firefox own DoH: `Settings > Privacy > DNS over HTTPS`.
+This didn't work.
+I have checked the output of 
+```
+resolvectl status
+```
+and I see that there is a link usng tailscale.
+When I turn off tailscale, then I cannot see any ducth DNS ISP in `ipleak.net`.
+Having checked some things with ChatGPT (so I am not 100% sure), 
+looks like my pihole may be giving the real country but there is no DNS leak.
+Nevertheless, I will turn off tailscale whenever I run qbittorrent, just in case.
+
