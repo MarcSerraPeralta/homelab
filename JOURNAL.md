@@ -1402,7 +1402,7 @@ I have also added the grafana website link:
 1. Update the Caddyfile to do a reverse proxy to the correct port (port 3000)
 
 
-# 2025/11/18 - qBitTorrent and ProtonVPN
+# 2025/11/18 - Setting up qBitTorrent and ProtonVPN in my laptop
 
 I want to set up my laptop to download torrents using qBitTorrent and ProtonVPN (to not expose my IP when torrenting).
 First, I install the ProtonVPN GUI for Ubuntu (because I am using Linux Mint) following the [ProtonVPN guide](https://protonvpn.com/support/official-linux-vpn-ubuntu/):
