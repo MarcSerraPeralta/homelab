@@ -1464,6 +1464,7 @@ Now I am running the newest version. I have run the same setup and checks as bef
 I have also added some dark theme (see `qbittorrent/`).
 The external IP shows the correct IP (i.e. the one from my VPN).
 When I am not connected via VPN, it shows `N/A`.
+I have also set up the configuration in qbittorrent such that when I close it, it actually gets closed (not minimized).
 
 Regarding `ipleak.net`, I can still see some entries in the DNS section comming from the Netherlands,
 although they come from North Holland and I am in South Holland. 
