@@ -1480,3 +1480,30 @@ Having checked some things with ChatGPT (so I am not 100% sure),
 looks like my pihole may be giving the real country but there is no DNS leak.
 Nevertheless, I will turn off tailscale whenever I run qbittorrent, just in case.
 
+
+# 2025/11/19 - Useful scripts for Jellyfin
+
+I have some media collection that I want to process for Jellyfin, this involves:
+- Transcoding all the files
+- Setting up the file structure and naming convention that Jellyfin wants
+
+I have checked that I have an Intel iGPU in my laptop that supports H264 transcoding.
+So I am using that when converting the files with ffmpeg (the script can be found in `jellyfin`).
+For that, I had to install vainfo:
+```
+sudo apt install vainfo
+```
+
+To host all these media in my server, I have also expanded its logical volume to maximum:
+```
+sudo lvextend -r -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+```
+When I reinstall the server in the mSATA drive, 
+I am not going to do this logical volume and just have all the disk available.
+
+Checking the codec formats supported by Jellyfin, I see that `H.265 8Bit` (or `HEVC`)
+is also supported in most cases (except with some warnings about old versions of browsers).
+Because HEVC is much better at compression, I will use it across all media.
+
+I still need to think what is the best way of manipulating the media files.
+
