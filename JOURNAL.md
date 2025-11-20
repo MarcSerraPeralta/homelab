@@ -1507,3 +1507,13 @@ Because HEVC is much better at compression, I will use it across all media.
 
 I still need to think what is the best way of manipulating the media files.
 
+
+# 2025/11/20 - Grafana dashboard for Jellyfin
+
+In the [Jellyfin docs](https://jellyfin.org/docs/general/post-install/networking/advanced/monitoring/), 
+it shows how to enable Prometheus metrics in Jellyfin (which can be added to Grafana).
+To enable it, edit `/etc/jellyfin/system.xml` and change this line from `false` to `true`:
+```
+<EnableMetrics>false</EnableMetrics>
+```
+Now I need to install prometheus in my server, but I will do later.
