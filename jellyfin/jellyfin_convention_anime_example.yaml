@@ -1,0 +1,6 @@
+name: One Piece
+year: 1999
+anidb: 69 # optional
+path: /path/to/season/directories
+jellyfin_animes_path: /path/to/Anime/directory # optional
+name_format: OnePiece - (\d+) # regex
