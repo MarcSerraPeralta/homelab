@@ -1,0 +1,8 @@
+name: Friends
+year: 1994
+imdb: tt0108778 # optional
+path: /path/to/season/directories
+jellyfin_tvshows_path: /path/to/TVShows/directory # optional
+season_1: # does not have to start at 1
+  subdirectory: t1
+  name_format: Friends - 1x(\d+) # regex
