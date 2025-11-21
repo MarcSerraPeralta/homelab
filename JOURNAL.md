@@ -1517,3 +1517,40 @@ To enable it, edit `/etc/jellyfin/system.xml` and change this line from `false` 
 <EnableMetrics>false</EnableMetrics>
 ```
 Now I need to install prometheus in my server, but I will do later.
+
+
+# 2025/11/21 - Notifications from new seasons and episodes
+
+I want to have a tool that notifies me of new seasons and new episodes.
+Currently I have a list of TV shows that I am following but I always forget to check for new episodes.
+I have found `seasonwatch` which is a light Python tool that uses "The Movie DataBase" (TMDB)
+to get the releases of new seasons and episodes.
+To install it, I had to run
+```
+pip install PyGObject==3.50.0
+pip install seasonwatch --no-build-isolation
+```
+The documentation on how to update the list of watched shows can be found in [its GitHub](https://github.com/gevhaz/seasonwatch).
+My current list is the following (`seasonwatch tv -l`):
+```
+┌────────────────────────┬─────────────────────┬─────────────────────────────────────┐
+│ Title                  │ Last watched season │ Hyperlink                           │
+├────────────────────────┼─────────────────────┼─────────────────────────────────────┤
+│ Final Space            │ 3                   │ https://www.themoviedb.org/tv/74387 │
+│ Scissor Seven          │ 4                   │ https://www.themoviedb.org/tv/79141 │
+│ Big Mouth              │ 7                   │ https://www.themoviedb.org/tv/74204 │
+│ Rick and Morty         │ 7                   │ https://www.themoviedb.org/tv/60625 │
+│ Sex Education          │ 3                   │ https://www.themoviedb.org/tv/81356 │
+│ Love, Death and Robots │ 3                   │ https://www.themoviedb.org/tv/86831 │
+└────────────────────────┴─────────────────────┴─────────────────────────────────────┘
+```
+and it returns the releases of new seasons when executing `seasonwatch`:
+```
+Season 5 of Scissor Seven is out already!
+Season 8 of Big Mouth is out already!
+Season 8 of Rick and Morty is out already!
+Season 4 of Sex Education is out already!
+Season 4 of Love, Death and Robots is out already!
+No season 4 found for Final Space
+```
+I need to pipe this into a cron job and send me some kind of notification when a new season is out.
