@@ -1554,3 +1554,32 @@ Season 4 of Love, Death and Robots is out already!
 No season 4 found for Final Space
 ```
 I need to pipe this into a cron job and send me some kind of notification when a new season is out.
+
+
+# 2025/11/24 - Installing `seasontracker`
+
+The current python in the server does not have pip install nor venv.
+When trying to run `python3 -m venv` I got told to install the following, which I do
+```
+sudo apt install python3.12-venv
+```
+Then I run the following commands:
+```
+cd ~/config_files/seasontracker
+git clone https://github.com/MarcSerraPeralta/seasontracker.git
+cd seasontracker/
+python3 -m venv venv
+source venv/bin/activate
+pip install .
+```
+Then I configure the `seasontracker` and set up a cron job for `run_seasontracker.sh`:
+```
+source /home/marc/config_files/seasontracker/venv/bin/activate
+seasontracker notify /home/marc/config_files/seasontracker/my_tracked_seasons.yaml
+deactivate
+```
+with 
+```
+crontab -e
+```
+every first day of the month at 8am using `0 08 1 * *`.
