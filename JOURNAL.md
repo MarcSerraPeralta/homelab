@@ -1583,3 +1583,22 @@ with
 crontab -e
 ```
 every first day of the month at 8am using `0 08 1 * *`.
+
+
+# 2025/11/26 - Installing Intro skipper for Jellyfin
+
+I want an intro skipper for jellyfin.
+The most popular option seems to be [this one](https://github.com/intro-skipper/intro-skipper/).
+I have followed the installation guide from [its wiki](https://github.com/intro-skipper/intro-skipper/wiki/Installation#step-1-install-the-plugin).
+However, after adding the repository to Jellyfin, I could not see the plugin in the "Available list of plugins".
+The reason was that my Jellyfin version was 10.11.2, while this plugin requires >=10.11.3.
+I just upgraded my jellyfin version with
+```
+sudo apt update
+sudo apt upgrade
+```
+Then, I could see the plugin. 
+I have installed it, restarted jellyfin, and run detection software for intro scenes.
+I have tried it with an episode of One piece (which has a recap followed by the intro),
+and it manages to detect the intro section and create a "Skip intro" button.
+
