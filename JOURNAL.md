@@ -1602,3 +1602,23 @@ I have installed it, restarted jellyfin, and run detection software for intro sc
 I have tried it with an episode of One piece (which has a recap followed by the intro),
 and it manages to detect the intro section and create a "Skip intro" button.
 
+
+# 2025/11/30 - Using Jellyfin for music
+
+I have been aware that Jellyfin can also be used like a self-hosted Spotify.
+It only requires installing an app that "mimics Spotify" like `Fineamp`, which is available in Google Play and iOS.
+Then I just need to add a library to Jellyfin that contains the music media.
+The app works well. 
+I have switched to the beta release because it has better UI (they have redesign it).
+The music library works quite well, but the files I have are not properly labelled so I have some incorrect categorization of songs.
+I will dig into that because the [Jellyfin documentation](https://jellyfin.org/docs/general/server/media/music/) is not very extensive.
+
+I have also made Jellyfin report the metrics, so that they can be used by Prometheus and Grafana.
+This was done by repeating the steps from 2025/11/20. 
+I believe this configuration was reseted when updating Jellyfin, but I am not sure.
+Now, when I do:
+```
+curl http://myserver:8096/metrics
+```
+I get information about Jellyfin.
+Now this needs to be pipelined to Prometheus, and then from Prometheus to Grafana.
