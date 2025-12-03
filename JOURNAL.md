@@ -1624,7 +1624,7 @@ I get information about Jellyfin.
 Now this needs to be pipelined to Prometheus, and then from Prometheus to Grafana.
 
 
-# 2025/12/03 - Metadata for Jellyfin music
+# 2025/12/03 - Metadata for Jellyfin music and installing prometheus
 
 The music metadata in Jellyfin gets taken from the `.mp3` file's metadata.
 It is still important to structure correctly the files in directories because
@@ -1634,4 +1634,94 @@ it has a useful program that can be used to replace the metadata of the `.mp3` f
 I have also manually added the images for the discs and the artists 
 (they are all called `folder.jpg` and are located in each of the directories)
 because Catalan music bands do not have images in the FanArt database.
+
+I am installing prometheus following [this guide](https://www.cherryservers.com/blog/install-prometheus-ubuntu).
+First, create the prometheus directories for storing the config files and the data (resp.):
+```
+sudo mkdir /etc/prometheus
+sudo mkdir /var/lib/prometheus
+```
+Then download prometheus from the official repo:
+```
+wget https://github.com/prometheus/prometheus/releases/download/v3.5.0/prometheus-3.5.0.linux-amd64.tar.gz
+tar vxf prometheus*.tar.gz
+cd prometheus*/
+```
+Then install prometheus:
+```
+sudo mv prometheus /usr/local/bin/
+sudo mv promtool /usr/local/bin/
+```
+Move the configuration file:
+```
+sudo mv prometheus.yml /etc/prometheus/
+```
+Create a system service for prometheus:
+```
+sudo vim /etc/systemd/system/prometheus.service
+```
+with the following content:
+```
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=marc
+Group=marc
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+    --config.file /etc/prometheus/prometheus.yml \
+    --storage.tsdb.path /var/lib/prometheus/ \
+
+[Install]
+WantedBy=multi-user.target
+```
+and then start the service:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable prometheus
+sudo systemctl start prometheus
+sudo systemctl status prometheus
+```
+so there is an error with prometheus because the service failed to start.
+The reason is that it does not have the correct permisions to edit files in `/var/lib/prometheus/`.
+This can be solved by:
+```
+sudo chown -R marc:marc /var/lib/prometheus
+```
+Then, prometheus is active and running with:
+```
+sudo systemctl start prometheus
+sudo systemctl status prometheus
+```
+Finally, allow to use the port for prometheus Web interface:
+```
+sudo ufw allow 9090/tcp
+```
+which I can access in my laptop using:
+```
+http://100.104.237.106:9090/
+```
+For convenience, I have also added prometheus website to Caddy and to pihole (`prometheus.home/`).
+
+To add the jellyfin metrics to prometheus, I have edited the prometheus config (`/etc/prometheus/prometheus.yml`)
+by adding the following lines under `scrape_configs:`:
+```
+  - job_name: "jellyfin"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["localhost:8096"]
+        labels:
+          app: "jellyfin"
+```
+then, I restart prometheus:
+```
+sudo systemctl restart prometheus
+sudo systemctl status prometheus
+```
+Then, I check in `https://prometheus.home/targets` that I see `jellyfin`'s status being `Up`.
+I have imported the prometheus data source to grafana in: Connections > Data sources > Add new data source
+using `localhost:9090` as data source.
 
