@@ -1,5 +1,10 @@
 # Managing TV Shows, Anime, and Music libraries in Jellyfin
 
+List of metadata providers for the Jellyfin libraries:
+- **TV shows**: imdb
+- **Anime**: anidb
+- **Music**: musicbrainz
+
 ## TV Shows
 
 Follow this steps for TV shows that have more than just one season.
