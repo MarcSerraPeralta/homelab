@@ -1622,3 +1622,16 @@ curl http://myserver:8096/metrics
 ```
 I get information about Jellyfin.
 Now this needs to be pipelined to Prometheus, and then from Prometheus to Grafana.
+
+
+# 2025/12/03 - Metadata for Jellyfin music
+
+The music metadata in Jellyfin gets taken from the `.mp3` file's metadata.
+It is still important to structure correctly the files in directories because
+the images for each artist and disc are stored there.
+I have set up my music metadata provider for Jellyfin to be MusicBrainz because 
+it has a useful program that can be used to replace the metadata of the `.mp3` for the correct one.
+I have also manually added the images for the discs and the artists 
+(they are all called `folder.jpg` and are located in each of the directories)
+because Catalan music bands do not have images in the FanArt database.
+
