@@ -1725,3 +1725,17 @@ Then, I check in `https://prometheus.home/targets` that I see `jellyfin`'s statu
 I have imported the prometheus data source to grafana in: Connections > Data sources > Add new data source
 using `localhost:9090` as data source.
 
+
+# 2025/12/06 - Monitoring server stats
+
+I have installed `ifstat` to get the network usage from the server:
+```
+sudo apt install ifstat
+```
+I have created a new script that takes the rate in KB/s for input and output of the different networks,
+in particular of `eno1` and `tailscale0`.
+I have used the same structure as the `log_cpu_temperature.sh` script.
+I have added this networking script to `crontab` (executed every minute).
+I have also added the scripts for the CPU usage, RAM usage, and disk usage.
+Then, I have added this information in the Grafana dashboard.
+
