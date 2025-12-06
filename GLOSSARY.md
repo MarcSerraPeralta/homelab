@@ -429,6 +429,28 @@ _Sources: Wikipedia_
 
 ### SATA connectors and storage
 
+### Linux filesystem structure
+
+To know where to save each file in a home server, 
+it is useful to know the filesystem structure of Linux:
+
+```
+/bin   -> binaries
+/dev   -> devices (virutal directory)
+/media -> where external storage will be mounted
+/mnt   -> "old /merdia"
+/etc   -> configuration files
+/home  -> home directories for every user (e.g. /home/marc)
+/usr   -> "old user home", now only /usr/bin is used
+/srv   -> server data
+/sys   -> info from devices (virtual directory)
+/tmp   -> temporary files
+/var   -> variable data files (e.g. logs)
+```
+
+_Sources: [LinuxFoundation](https://www.linuxfoundation.org/blog/blog/classic-sysadmin-the-linux-filesystem-explained)_
+
+
 ### Mounting disks
 
 ### Monitoring sensors
