@@ -1739,3 +1739,10 @@ I have added this networking script to `crontab` (executed every minute).
 I have also added the scripts for the CPU usage, RAM usage, and disk usage.
 Then, I have added this information in the Grafana dashboard.
 
+
+# 2025/12/11 - Monitor /srv disk usage and Jellyfin status
+
+I have created a crontab job that runs every day at 3AM that reports the subdirectory sizes of `/srv`.
+I have also added a job that just tries to get the metrics from Jellyfin and reports the status (up/down).
+I have added this information to Grafana and created an alert to notify me when Jellyfin is down.
+
