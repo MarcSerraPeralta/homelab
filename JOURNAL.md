@@ -1232,7 +1232,7 @@ sudo ss -tulpen | grep "caddy"
 it is not, because the Caddyfile does not specify that I want caddy to listen to ports 80 and 443.
 I changed it (`sudo vim /etc/caddy/Caddyfile`) to:
 ```
-i:80 {
+:80 {
         # Set this path to your site's directory.
         root * /usr/share/caddy
 
@@ -1745,4 +1745,15 @@ Then, I have added this information in the Grafana dashboard.
 I have created a crontab job that runs every day at 3AM that reports the subdirectory sizes of `/srv`.
 I have also added a job that just tries to get the metrics from Jellyfin and reports the status (up/down).
 I have added this information to Grafana and created an alert to notify me when Jellyfin is down.
+
+
+# 2025/12/12 - Lag in Grafana
+
+When looking at the "Server stats" page in Grafana, it gets laggy and the CPU usage spikes to 90%.
+I believe this is because Grafana needs to read CSV files with 100k lines, 
+which is CPU intensive.
+I have now made all logs to run every 5s instead of 1-2s, 
+so that the file size for 24h can be reduced from 100k lines to 18k lines.
+Now, the interface is more responsive.
+I have to see if I use the 24h visualizations, if not I can further reduce the log files' size.
 
