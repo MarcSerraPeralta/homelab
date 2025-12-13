@@ -1757,3 +1757,16 @@ so that the file size for 24h can be reduced from 100k lines to 18k lines.
 Now, the interface is more responsive.
 I have to see if I use the 24h visualizations, if not I can further reduce the log files' size.
 
+
+# 2025/12/13 - Better logs for monitoring stats
+
+I believe that Grafana lags because it needs to process the data from the CSV log files 3 times,
+as I have 3 panels for: instantaneous, last 1h, and last 24h data.
+Note that Grafana updates the dashboards every 5s at the fastest mode.
+To recude the processing requirements, I can create 3 different log files:
+- instantaneous (point every 1-5s): a single line in the file
+- last 1h (point every 5s): `1 line / 5s * 3600s = 720 lines` in the file
+- last 24h (point every 30s): `1 line / 30s * 3600s / 1h * 24h = 2880 lines` in the file
+
+The data for the "last 24h" can be the average of the points from the instantaneous of "last 1h" data.
+I have coded this up and now Grafana does not lag anymore and the CPU usage is <10%.
