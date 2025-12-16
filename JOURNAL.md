@@ -1770,3 +1770,60 @@ To recude the processing requirements, I can create 3 different log files:
 
 The data for the "last 24h" can be the average of the points from the instantaneous of "last 1h" data.
 I have coded this up and now Grafana does not lag anymore and the CPU usage is <10%.
+
+
+# 2025/12/15 - Remote play from gaming PC
+
+I have a Windows 11 tower PC with a GPU that I use for gaming. 
+I want to be able to remotely connect to it so that I can hame when I am not home.
+The games I play are not super fast-paced / require super low latency (e.g. first-person shooter)
+but I want to minimize latency.
+Another problem is that I do not want to keep my PC on while I am away.
+For this latter problem, I will use "Wake on LAN", see issue [#43](https://github.com/MarcSerraPeralta/homelab/issues/43),
+because I will always have my home server on and connected to the same LAN.
+I have followed [this Youtube tutorial](https://m.youtube.com/watch?v=qX8KBFL0jjI&pp=ygUWd2FrZSBvbiBsYW4gd2luZG93cyAxMQ%3D%3D).
+My gaming PC motherboard is "ASUS PRIME B450 M-K II".
+I enter the BIOS ("del" key) and select the following:
+```
+BIOS > Advanced Mode > Advanced > APM Configuration > Power On By PCI-E: change to "Enabled" to turn on WoL
+```
+Then, I go to Windows 11 and change the following:
+```
+Device Manager > Network adapters > Properties > Advanced > Wake on Magic Packet: enable (also enable any other ones that seem reasonable)
+Device Manager > Network adapters > Properties > Power Management > Only allow a magic packet to wake the computer
+```
+and I run the following command in Windows PowerShell as administrator (right click: open as administrator): 
+```
+powercfg /hibernate off
+```
+On my server, I install the following:
+```
+sudo apt install wakeonlan
+```
+Then, I have veryfied that by running: 
+```
+wakeonlan <MAC_address_gaming_PC>
+```
+I can wake up my gaming PC from both Sleep mode and Shutdown mode,
+where Shutdown mode is when the PC is completely turned off. 
+
+Then, I need to be able to remote control the gaming PC.
+For that, I do not want to use AnyDesk or TeamViewer.
+I have found a free and open-source software that can be self-hosted called
+Moonlight (client) and Sunshine (host), see issue [#44](https://github.com/MarcSerraPeralta/homelab/issues/44).
+I installed sunshine in my gaming PC and allowed to run on startup, 
+so that I can log in on Windows remotely when turning it on with "Wake on LAN".
+I installed moonlight in my phone. 
+After completing the moonlight configuration with my gaming PC, I can connect without any problem.
+I installed moonlight on my Linux Mint laptop with flatpack. 
+It also works without problem.
+I have also followed some of the tips in [this Sunshine configuration guide](https://www.reddit.com/r/MoonlightStreaming/comments/1nmqalh/ultimate_guide_to_configuring_moonlight_sunshine/).
+
+I can do the full procedure as I would when playing away from home:
+1. `wakeonlan ...`
+1. Wait until the PC is on
+1. Connect to PC using moonlight
+1. Log in to Windows remotely
+1. Play games
+1. Shut down computer
+
