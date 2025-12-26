@@ -1827,3 +1827,10 @@ I can do the full procedure as I would when playing away from home:
 1. Play games
 1. Shut down computer
 
+
+# 2025/12/26 - Disallowed video transcoding in Jellyfin
+
+I have disallowed video transcoding for all users in Jellyfin to avoid selecting by mistake a different codec/bitrate,
+which makes the CPU usage and temperature to spike (as the iGPU does not have transcoding features).
+This can be done by editing each user and unmarking the option "Allow video transcoding ...".
+
