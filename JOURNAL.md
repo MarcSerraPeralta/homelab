@@ -1834,3 +1834,11 @@ I have disallowed video transcoding for all users in Jellyfin to avoid selecting
 which makes the CPU usage and temperature to spike (as the iGPU does not have transcoding features).
 This can be done by editing each user and unmarking the option "Allow video transcoding ...".
 
+
+# 2025/12/30 - Remote gaming on my home (gaming) PC
+
+My internet speed is around 80 Mbps (upload) and 60 Mbps (download).
+I have been able to play games remotely with Moonlight + Sunshine 
+(e.g. "It takes two") streaming at 1080p and 60fps without any problem.
+The distance between my home and where I was playing was around 1500 km.
+
