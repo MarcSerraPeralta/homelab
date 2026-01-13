@@ -1843,6 +1843,21 @@ I have been able to play games remotely with Moonlight + Sunshine
 The distance between my home and where I was playing was around 1500 km.
 
 
+# 2026/01/11 - Wii emulation on my gaming PC
+
+I have installed Dolphin (Wii emulator) in my gaming PC and downloaded "stuff" from `f"{best editor}m.{'clean' in Catalan}"`
+(using ProtonVPN).
+I have followed the steps from [this video](https://www.youtube.com/watch?v=ciAJMgnrGrY)
+to configure Dolphin.
+Now I can run Wii games on my gaming PC using my keyboard and mouse as controllers.
+
+I have seen that Wiimotes (Wii remote controllers) can be connected to the PC
+and used by Dolphin as controllers.
+However, Dolphin prefers the original Wiimotes. 
+I will probably buy them online.
+There is also the "Dolphin bar", but I do not know if that is needed...
+
+
 # 2026/01/13 - Adding disk storage to my home server (Part 1)
 
 I currently have only 256GB of SSD storage in my home server, 
