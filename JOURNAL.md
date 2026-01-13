@@ -1842,3 +1842,47 @@ I have been able to play games remotely with Moonlight + Sunshine
 (e.g. "It takes two") streaming at 1080p and 60fps without any problem.
 The distance between my home and where I was playing was around 1500 km.
 
+
+# 2026/01/13 - Adding disk storage to my home server (Part 1)
+
+I currently have only 256GB of SSD storage in my home server, 
+which is insuficient to store all my personal media and computer backups, in particular:
+personal pictures and videos, TV shows, movies, music...
+For Christmas, I got:
+```
+1TB SATA 2.5-inch SSD BX500 from crucial (by micron)
+with reads up to 540 MB/s.
+```
+and
+```
+256GB mSATA SSD SKC600MS from Kingston
+```
+The plan is the following:
+- 256GB mSATA
+    - Ubuntu (OS) < 5GB
+    - Immich backup phone < 10GB
+    - Email backup < 30GB
+    - Documents < 1GB
+    - Jellyfin music < 50GB
+    - Security webcam footage < 50GB
+- 1TB SATA
+    - Jellyfin shows
+    - Jellyfin movies
+    - Immich (full library)
+    - Laptop backup
+
+I do not plan on having a lot of shows and/or movies in Jellyfin,
+only the TV shows and the seasons that I am currently watching.
+This is why 1TB is enough.
+
+I would still have an extra 256GB SATA SSD, 
+which is currently used for Ubuntu and everything.
+The only extra connection in my home server is a SlimSATA connector,
+so I would need an adapter from SlimSATA to SATA to be able to use this extra 256GB of storage.
+
+Before installing the new drives, 
+I have backed up the home files and scripts from my home server to my laptop using `rsync`.
+I have dissasembled the required parts to access the mSATA slot following [this video](https://www.youtube.com/watch?v=pP0L6xs-QMw).
+To secure the mSATA SSD, I need two M1.6 x 3mm screws that I do not currently have.
+I have bought a set of screws from Amazon that will in theory arrive tomorrow.
+
