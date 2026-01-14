@@ -1896,8 +1896,85 @@ The only extra connection in my home server is a SlimSATA connector,
 so I would need an adapter from SlimSATA to SATA to be able to use this extra 256GB of storage.
 
 Before installing the new drives, 
-I have backed up the home files and scripts from my home server to my laptop using `rsync`.
+I have backed up my home directory from my home server to my laptop using `rsync`.
 I have dissasembled the required parts to access the mSATA slot following [this video](https://www.youtube.com/watch?v=pP0L6xs-QMw).
 To secure the mSATA SSD, I need two M1.6 x 3mm screws that I do not currently have.
 I have bought a set of screws from Amazon that will in theory arrive tomorrow.
+
+
+# 2026/01/14 - Adding disk storage to my home server (Part 2) and reinstalling everything
+
+The screws have arrived. 
+
+Before tearing off the server and install the new storage, 
+I have backed up the Grafana dashboards by going to each dashboard and selecting:
+`Export > Export as code > Export for sharing externally`.
+
+Again, I have dissasembled the required parts to access the mSATA slot following [this video](https://www.youtube.com/watch?v=pP0L6xs-QMw).
+I have installed the 256GB mSATA SSD with two M1.6 x 3mm screws and 
+I have also installed the 1TB SATA SSD. See pictures in the correspoding journal media directory.
+
+To simplify the installation of Ubuntu Server 24.04 LTS in the 256GB mSATA SSD,
+I have removed the 1TB SATA SSD (so that there is only a single drive).
+I have tried using the same USB stick that I used for installing Ubuntu in my home server,
+but it gave me the following error when I click "Try and Install Ubuntu Server": 
+`error invalid magic number, you need to load kernel first`.
+In the Internet, people say to disable both the Legacy Boot and Secure Boot mode in the BIOS
+and to burn again the Ubuntu ISO in the USB. To burn it, I used:
+```
+sudo dd if=/home/marc/Downloads/ubuntu-24.04.3-live-server-amd64.iso of=/dev/sdb
+```
+with `/dev/sdb` being the USB device, which I have obtained from `sudo fdisk -l`.
+Now, the installation worked. 
+I have used the same configuration as described in 2025/10/07 but with the difference
+on the storage configuration that I will not use a LVM group.
+The reason is that I expanded the LVM to the max on 2025/11/19, 
+so it does not make sense to use an LVM group.
+
+Below is a list of the commands that I have executed to set up the home server:
+```
+sudo apt update
+sudo apt upgrade
+sudo apt autoremove
+
+sudo timedatectl set-timezone Europe/Amsterdam
+
+# install tailscale
+curl -fsSL https://tailscale.com/install.sh | sh
+# configure UDP-GRO for tailscale
+pconfig-udp-grorintf '#!/bin/sh\n\nethtool -K %s rx-udp-gro-forwarding on rx-gro-list off \n' "$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")" | sudo tee /etc/networkd-dispatcher/routable.d/50-tailscale
+sudo chmod 755 /etc/networkd-dispatcher/routable.d/50-tailscale
+sudo /etc/networkd-dispatcher/routable.d/50-tailscale
+test $? -eq 0 || echo 'An error occurred.'
+# subnet routers for tailscale
+echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+sudo sysctl -p /etc/sysctl.d/99-tailscale.conf
+# ensure firewall
+sudo ufw default deny routed
+sudo ufw allow ssh
+sudo ufw enable
+# enable tailscale
+sudo tailscale up --accept-dns=false --advertise-exit-node --advertise-routes=192.168.0.0/24
+
+# install pi-hole
+sudo tailscale down
+curl -sSL https://install.pi-hole.net | bash
+sudo pihole setpassword
+# update firewall rules for pi-hole
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 53/tcp
+sudo ufw allow 53/udp
+sudo ufw allow 67/tcp
+sudo ufw allow 67/udp
+sudo ufw allow 123/udp
+sudo tailscale up
+# after changing option to "Permit all origins"
+sudo systemctl restart pihole-FTL
+# after adding new blocklists
+sudo pihole -g
+```
+
+I have also edited the tailnet IPv4 of my server to `100.100.50.50`, see issue [#55](https://github.com/MarcSerraPeralta/homelab/issues/55).
 
