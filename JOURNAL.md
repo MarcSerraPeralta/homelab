@@ -2002,6 +2002,10 @@ lsblk -f
 ```
 which works.
 
+I have copied the configuration files in `config_files` to my home server:
+```
+rsync -avh config_files marc@192.168.0.50:/tmp/
+```
 Below is a list of the commands that I have executed to set up the home server:
 ```
 sudo apt update
@@ -2009,6 +2013,7 @@ sudo apt upgrade
 sudo apt autoremove
 
 sudo timedatectl set-timezone Europe/Amsterdam
+mv /tmp/config_files/.selected_editor $HOME/
 
 # install tailscale
 curl -fsSL https://tailscale.com/install.sh | sh
@@ -2045,7 +2050,50 @@ sudo tailscale up
 sudo systemctl restart pihole-FTL
 # after adding new blocklists
 sudo pihole -g
+
+# set up scripts for the server stats
+mv /tmp/config_files/monitoring $HOME
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_cpu_temperature.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_cpu_usage.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_disk_usage.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_jellyfin_status.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_network_usage.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_ram_usage.sh") | crontab -
+(crontab -l 2>/dev/null; echo "0 3 * * * /home/marc/monitoring/log_srv_disk_usage.sh") | crontab -
+
+# install docker for Immich
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# install Immich
+mv /tmp/config_files/config_files $HOME
+sudo mkdir -p /srv/immich
+sudo chown -R $USER:$USER /srv/immich
+mkdir -p /srv/immich/external_library
+sudo usermod -aG docker $USER
+newgrp docker
+cd $HOME/config_files/immich-app
+docker compose up -d
+# set up Immich by visiting http://100.100.50.50:2283
 ```
 
 I have also edited the tailnet IPv4 of my server to `100.100.50.50`, see issue [#55](https://github.com/MarcSerraPeralta/homelab/issues/55).
-
+I have set up Immich to use Storage Template with the template being `{{album}}/{{filename}}`.
+I have also copied all my personal photos to the server:
+```
+rsync -avh /media/marc/Samsung/images/ marc@100.100.50.50:/srv/immich/external_library/
+```
