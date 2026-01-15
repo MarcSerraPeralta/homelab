@@ -1902,7 +1902,7 @@ To secure the mSATA SSD, I need two M1.6 x 3mm screws that I do not currently ha
 I have bought a set of screws from Amazon that will in theory arrive tomorrow.
 
 
-# 2026/01/14 - Adding disk storage to my home server (Part 2) and reinstalling everything
+# 2026/01/14 - Adding disk storage to my home server (Part 2)
 
 The screws have arrived. 
 
@@ -1930,6 +1930,77 @@ I have used the same configuration as described in 2025/10/07 but with the diffe
 on the storage configuration that I will not use a LVM group.
 The reason is that I expanded the LVM to the max on 2025/11/19, 
 so it does not make sense to use an LVM group.
+
+# 2026/01/15 - Adding disk storage to my home server (Part 3) and reinstalling everything
+
+Once the installation has been finished and rebooted, I have run an update:
+```
+sudo apt update
+sudo apt upgrade
+sudo apt autoremove
+```
+and I have turned off the server.
+I have installed the 1TB SATA SSD and will proceed to permanently mount it 
+(and also automatically mount it in boot) at `/srv` because it will store
+the server media (from Jellyfin, Immich...).
+First, I check the disks and partitions:
+```
+lsblk -f
+```
+I see that the `sdb` corresponds to the 256GB mSATA SSD and that `sda` does not have any partitions,
+which corresponds to the 1TB SATA SSD.
+To create a GPT partition of the 1TB SATA SSD, I use `parted`:
+```
+sudo parted /dev/sda
+```
+This opens an interactive mode, where I execute (line by line):
+```
+mklabel gpt
+mkpart primary ext4 0% 100%
+quit
+```
+Then I format the partition as `ext4`:
+```
+sudo mkfs.ext4 /dev/sda1
+```
+which I verify with
+```
+lsblk -f
+```
+I then make sure that `/srv` exists and that it is empty:
+```
+ls -A /srv
+```
+Get the UUID of the 1TB SATA SSD:
+```
+blkid /dev/sda1
+```
+which does not work, but I can get it from `lsblk -f`, which is
+`0837a1d9-f522-401e-9a37-1546365cddcb`.
+Then I add it to `/etc/fstab`:
+```
+sudo vim /etc/fstab
+```
+by adding the following line:
+```
+/dev/disk/by-uuid/0837a1d9-f522-401e-9a37-1546365cddcb /srv ext4 defaults,noatime 0 2
+```
+and then running the following to update the configuration:
+```
+sudo systemctl daemon-reload
+```
+Finally, I test that everything works:
+```
+sudo mount -a
+df -h /srv
+lsblk -f
+```
+I reboot the PC and recheck:
+```
+df -h /srv
+lsblk -f
+```
+which works.
 
 Below is a list of the commands that I have executed to set up the home server:
 ```
