@@ -2097,3 +2097,24 @@ I have also copied all my personal photos to the server:
 ```
 rsync -avh /media/marc/Samsung/images/ marc@100.100.50.50:/srv/immich/external_library/
 ```
+It took around 5h to process around 20.000 photos and 1.200 videos. 
+The job that takes the most time is OCR.
+
+
+# 2026/01/16 - Retrieving `/srv` data from old SSD
+
+I want to retrieve the data from the `/srv` directory form the old SSD,
+mainly the Jellyfin media. 
+A problem is that I do not have a USB-to-SATA adapter, so what I have done is the following:
+```
+cd $HOME/config_files/immich-app
+docker compose down # stops Immich
+sudo poweroff
+```
+Then change the 1TB SATA SSD by the old 256GB SATA SSD.
+On boot, enter the BIOS to ensure to boot from the 256GB mSATA SSD.
+Then, I mounted the old SSD (this was a little bit special because it was a LVM)
+and transfered all the files to the mSATA.
+Finally, I powered off the machine, changed the old SSD to the 1TB SSD,
+turned on the server, and transfered the files from mSATA to the 1TB SSD.
+
