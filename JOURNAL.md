@@ -2053,6 +2053,7 @@ sudo pihole -g
 
 # set up scripts for the server stats
 mv /tmp/config_files/monitoring $HOME
+sudo apt install ifstat
 (crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_cpu_temperature.sh") | crontab -
 (crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_cpu_usage.sh") | crontab -
 (crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_disk_usage.sh") | crontab -
@@ -2118,3 +2119,28 @@ and transfered all the files to the mSATA.
 Finally, I powered off the machine, changed the old SSD to the 1TB SSD,
 turned on the server, and transfered the files from mSATA to the 1TB SSD.
 
+
+# 2026/01/17 - Reinstalling everything (Part 2)
+
+Continuing the list of commands to set up the home server:
+```
+# installing Grafana
+sudo apt-get install apt-transport-https wget
+sudo mkdir -p /etc/apt/keyrings/
+wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install grafana
+sudo systemctl enable --now grafana-server
+sudo grafana-cli plugins install yesoreyeram-infinity-datasource
+sudo systemctl restart grafana-server
+# default username: admin and password: admin
+# create point for getting the data from HTTP
+sudo mv /tmp/config_files/monitoring-data-http.service /etc/systemd/system/monitoring-data-http.service
+sudo systemctl daemon-reload
+sudo systemctl enable monitoring-data-http.service
+sudo systemctl start monitoring-data-http.service
+# import dashboards
+# edit /etc/grafana/grafana.ini to add smtp information
+sudo systemctl restart grafana-server
+```

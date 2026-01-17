@@ -9,7 +9,7 @@ echo "used,available,path,depth" > "$LOGFILE"
 # suppress permission errors, sort by size
 du --max-depth=3 "$BASE_DIR" 2>/dev/null | sort -rn > "$TMPFILE"
 
-AVAIL_SPACE=$(df -k / | awk 'NR==2 {print $4}')
+AVAIL_SPACE=$(df -k /srv/ | awk 'NR==2 {print $4}')
 
 while read -r size path; do
     # remove base directory from path for depth calculation
@@ -27,7 +27,7 @@ while read -r size path; do
         full_path="$BASE_DIR/$relative_path"
     fi
 
-    echo "$size,$AVAIL_SPACE,$full_path,$depth" >> "$LOGFILE"
+    echo "$size,$AVAIL_SPACE,\"$full_path\",$depth" >> "$LOGFILE"
 
 done < "$TMPFILE"
 
