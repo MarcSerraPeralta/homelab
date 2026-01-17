@@ -2140,7 +2140,25 @@ sudo mv /tmp/config_files/monitoring-data-http.service /etc/systemd/system/monit
 sudo systemctl daemon-reload
 sudo systemctl enable monitoring-data-http.service
 sudo systemctl start monitoring-data-http.service
-# import dashboards
 # edit /etc/grafana/grafana.ini to add smtp information
+# import dashboards and alerts
 sudo systemctl restart grafana-server
+
+# installing jellyfin
+curl https://repo.jellyfin.org/install-debuntu.sh | sudo bash
+# edit /etc/jellyfin/network.xml (section about subnets to add the Tailnet)
+sudo systemctl restart jellyfin
+# connect to jellyfin using the tailnet IP of the server and configure it
+# install plugins, including https://intro-skipper.org/manifest.json
+sudo systemctl restart jellyfin
+
+# installing caddy
+sudo apt install caddy
+# sudo vim /etc/pihole/pihole.toml -> port = "8080o,80o,443os,[::]:80o,[::]:443os"
+sudo systemctl stop pihole-FTL
+sudo systemctl restart caddy
+sudo systemctl start pihole-FTL
+# add the DNS entries to pihole Local DNS Entries
+# download CA certificate in laptop using: 
+# ssh -t marc@myserver "sudo cat /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt" > root.crt
 ```
