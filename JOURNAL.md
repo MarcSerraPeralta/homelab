@@ -2177,3 +2177,68 @@ mv /tmp/config_files/config_files/seasontracker/run_seasontracker.sh $HOME/confi
 chmod +x $HOME/config_files/seasontracker/run_seasontracker.sh
 (crontab -l 2>/dev/null; echo "0 8 1 * * /home/marc/config_files/seasontracker/run_seasontracker.sh") | crontab -
 ```
+
+# 2026/01/18 - Automatic backup of personal laptop
+
+I want to automatically back up my personal laptop on my home server, 
+see issue [#23](https://github.com/MarcSerraPeralta/homelab/issues/23) for more information.
+
+First, I create the directory to store the backups:
+```
+sudo mkdir -p /srv/backups
+sudo chown $USER:$USER /srv/backups
+mkdir /srv/backups/thinkpad
+```
+I have created the bash script to run the backup in `config_files/backup-to-myserver.sh`.
+Remember to run `chmod +x ...` on the file so that it can be executed in the laptop.
+Then I have created the file `~/.config/systemd/user/laptop-backup.service` in my latop
+with the following contents:
+```
+[Unit]
+Description=Automatic laptop backup to home server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/usuari/custom/linux/backup_options/backup-to-myserver.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+```
+and the file `~/.config/systemd/user/laptop-backup.timer` with the following contents:
+```
+[Unit]
+Description=Run laptop backup automatically
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=7d
+Persistent=true
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target
+```
+Finally, I enable the automatic backup:
+```
+systemctl --user daemon-reload
+systemctl --user enable --now laptop-backup.timer
+```
+and check that it is running correctly:
+```
+systemctl --user list-timers
+systemctl --user status laptop-backup.service
+```
+It didn't work because I haven't set up a SSH key for the server
+(so that it automatically connects without asking a password).
+This can be done using:
+```
+ssh-copy-id -i ~/.ssh/id_ed25519.pub marc@100.100.50.50
+```
+Then I restart the service with:
+```
+systemctl --user daemon-reload
+systemctl --user start laptop-backup.service
+```
+and this time it works.
