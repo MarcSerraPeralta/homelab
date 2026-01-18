@@ -1,0 +1,137 @@
+# this script is not designed to be executed blindly with ./run_setup_myserver.sh
+# one should copy-paste the commands and do what the comments say
+sudo apt update
+sudo apt upgrade
+sudo apt autoremove
+
+sudo timedatectl set-timezone Europe/Amsterdam
+mv /tmp/config_files/.selected_editor $HOME/
+
+# install tailscale
+curl -fsSL https://tailscale.com/install.sh | sh
+# configure UDP-GRO for tailscale
+pconfig-udp-grorintf '#!/bin/sh\n\nethtool -K %s rx-udp-gro-forwarding on rx-gro-list off \n' "$(ip -o route get 8.8.8.8 | cut -f 5 -d " ")" | sudo tee /etc/networkd-dispatcher/routable.d/50-tailscale
+sudo chmod 755 /etc/networkd-dispatcher/routable.d/50-tailscale
+sudo /etc/networkd-dispatcher/routable.d/50-tailscale
+test $? -eq 0 || echo 'An error occurred.'
+# subnet routers for tailscale
+echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+sudo sysctl -p /etc/sysctl.d/99-tailscale.conf
+# ensure firewall
+sudo ufw default deny routed
+sudo ufw allow ssh
+sudo ufw enable
+# enable tailscale
+sudo tailscale up --accept-dns=false --advertise-exit-node --advertise-routes=192.168.0.0/24
+
+# install pi-hole
+sudo tailscale down
+curl -sSL https://install.pi-hole.net | bash
+sudo pihole setpassword
+# update firewall rules for pi-hole
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 53/tcp
+sudo ufw allow 53/udp
+sudo ufw allow 67/tcp
+sudo ufw allow 67/udp
+sudo ufw allow 123/udp
+sudo tailscale up
+# after changing option to "Permit all origins"
+sudo systemctl restart pihole-FTL
+# after adding new blocklists
+sudo pihole -g
+
+# set up scripts for the server stats
+mv /tmp/config_files/monitoring $HOME
+sudo apt install ifstat
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_cpu_temperature.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_cpu_usage.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_disk_usage.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_jellyfin_status.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_network_usage.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /home/marc/monitoring/log_ram_usage.sh") | crontab -
+(crontab -l 2>/dev/null; echo "0 3 * * * /home/marc/monitoring/log_srv_disk_usage.sh") | crontab -
+
+# install docker for Immich
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# install Immich
+mv /tmp/config_files/config_files $HOME
+sudo mkdir -p /srv/immich
+sudo chown -R $USER:$USER /srv/immich
+mkdir -p /srv/immich/external_library
+sudo usermod -aG docker $USER
+newgrp docker
+cd $HOME/config_files/immich-app
+docker compose up -d
+# set up Immich by visiting http://100.100.50.50:2283
+
+# installing Grafana
+sudo apt-get install apt-transport-https wget
+sudo mkdir -p /etc/apt/keyrings/
+wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install grafana
+sudo systemctl enable --now grafana-server
+sudo grafana-cli plugins install yesoreyeram-infinity-datasource
+sudo systemctl restart grafana-server
+# default username: admin and password: admin
+# create point for getting the data from HTTP
+sudo mv /tmp/config_files/monitoring-data-http.service /etc/systemd/system/monitoring-data-http.service
+sudo systemctl daemon-reload
+sudo systemctl enable monitoring-data-http.service
+sudo systemctl start monitoring-data-http.service
+# edit /etc/grafana/grafana.ini to add smtp information
+# import dashboards and alerts
+sudo systemctl restart grafana-server
+
+# installing jellyfin
+curl https://repo.jellyfin.org/install-debuntu.sh | sudo bash
+# edit /etc/jellyfin/network.xml (section about subnets to add the Tailnet)
+sudo systemctl restart jellyfin
+# connect to jellyfin using the tailnet IP of the server and configure it
+# install plugins, including https://intro-skipper.org/manifest.json
+# edit /etc/jellyfin/system.xml (enable metrics)
+sudo systemctl restart jellyfin
+
+# installing caddy
+sudo apt install caddy
+# sudo vim /etc/pihole/pihole.toml -> port = "8080o,80o,443os,[::]:80o,[::]:443os"
+sudo systemctl stop pihole-FTL
+sudo systemctl restart caddy
+sudo systemctl start pihole-FTL
+# add the DNS entries to pihole Local DNS Entries
+# download CA certificate in laptop using: 
+# ssh -t marc@myserver "sudo cat /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt" > root.crt
+
+# install season tracker
+sudo apt install python3.12-venv
+cd $HOME/config_files
+git clone https://github.com/MarcSerraPeralta/seasontracker.git
+cd seasontracker
+python3 -m venv venv
+source venv/bin/activate
+pip install .
+# set up seasontracker using 'seasontracker login ...'
+mv /tmp/config_files/config_files/seasontracker/my_tracked_seasons.yaml $HOME/config_files/seasontracker/my_tracked_seasons.yaml
+mv /tmp/config_files/config_files/seasontracker/run_seasontracker.sh $HOME/config_files/seasontracker/run_seasontracker.sh
+chmod +x $HOME/config_files/seasontracker/run_seasontracker.sh
+(crontab -l 2>/dev/null; echo "0 8 1 * * /home/marc/config_files/seasontracker/run_seasontracker.sh") | crontab -

@@ -2150,6 +2150,7 @@ curl https://repo.jellyfin.org/install-debuntu.sh | sudo bash
 sudo systemctl restart jellyfin
 # connect to jellyfin using the tailnet IP of the server and configure it
 # install plugins, including https://intro-skipper.org/manifest.json
+# edit /etc/jellyfin/system.xml (enable metrics)
 sudo systemctl restart jellyfin
 
 # installing caddy
@@ -2161,4 +2162,18 @@ sudo systemctl start pihole-FTL
 # add the DNS entries to pihole Local DNS Entries
 # download CA certificate in laptop using: 
 # ssh -t marc@myserver "sudo cat /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt" > root.crt
+
+# install season tracker
+sudo apt install python3.12-venv
+cd $HOME/config_files
+git clone https://github.com/MarcSerraPeralta/seasontracker.git
+cd seasontracker
+python3 -m venv venv
+source venv/bin/activate
+pip install .
+# set up seasontracker using 'seasontracker login ...'
+mv /tmp/config_files/config_files/seasontracker/my_tracked_seasons.yaml $HOME/config_files/seasontracker/my_tracked_seasons.yaml
+mv /tmp/config_files/config_files/seasontracker/run_seasontracker.sh $HOME/config_files/seasontracker/run_seasontracker.sh
+chmod +x $HOME/config_files/seasontracker/run_seasontracker.sh
+(crontab -l 2>/dev/null; echo "0 8 1 * * /home/marc/config_files/seasontracker/run_seasontracker.sh") | crontab -
 ```
