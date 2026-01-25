@@ -2388,3 +2388,9 @@ PassCmd "cat ~/.mbsync-pw-gmail"
 ```
 Now it works.
 
+I had problems with the UIDVALIDITY when rerunning `mbsync` because
+I have changed some parameters in the Gmail IMAP configuration
+and I have removed the email archive directory in `/srv_msata`.
+The thing is that `mbsync` also stores the UIDVALIDITY files in `~/mbsync/`.
+The solution to the UIDVALIDITY problems is to remove the files inside `~/mbsync/`.l
+
