@@ -2242,3 +2242,149 @@ systemctl --user daemon-reload
 systemctl --user start laptop-backup.service
 ```
 and this time it works.
+
+
+# 2026/01/25 - Automatic email archive for Gmail
+
+Here, I am implementing the content of issue [#25](https://github.com/MarcSerraPeralta/homelab/issues/25).
+First, I am going to focus on setting up the email archive for my Gmail account.
+
+I install `mbsync`:
+```
+sudo apt install isync
+```
+I enable IMAP by: Go to Gmail Settings > Forwarding and POP/IMAP > Set IMAP Access to Enable.
+I also ensure that "Sent" and "Inbox" have "Show in IMAP" checked in the "Labels" tab in settings.
+Also, I generate an App Password and store it in my server using:
+```
+sudo apt install gnupg
+echo "your-16-char-app-password" > ~/.mbsyncpass-gmail
+gpg --symmetric --cipher-algo AES256 ~/.mbsyncpass-gmail
+rm ~/.mbsyncpass-gmail
+```
+
+I create the email archive directory:
+```
+sudo mkdir -p /srv_msata/mail-archive/gmail
+sudo chown -R $USER:$USER /srv_msata/mail-archive
+chmod 700 /srv_msata/mail-archive
+```
+
+Then I configure `mbsync` (`vim ~/.mbsyncrc`):
+```
+# GMAIL REMOTE STORAGE
+IMAPStore gmail-remote
+Host imap.gmail.com
+User marcserraperalta@gmail.com
+PassCmd "gpg --quiet --for-your-eyes-only --no-tty -d ~/.mbsyncpass-gmail.gpg"
+SSLType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+# LOCAL ARCHIVE STORAGE
+MaildirStore gmail-local
+SubFolders Verbatim
+Path /srv_msata/mail-archive/gmail/
+Inbox /srv_msata/mail-archive/gmail/Inbox
+
+# ARCHIVE CHANNEL
+Channel gmail
+Far :gmail-remote:
+Near :gmail-local:
+# Only sync Inbox and Sent
+Patterns "INBOX" "[Gmail]/Sent Mail"
+Create Near
+Expunge None
+Sync Pull
+```
+I can check that it runs correctly and start archiving the emails using:
+```
+mbsync -Va
+```
+
+I see in the files in `/srv_msata/mail-archive/gmail/Inbox/cur/` are using 
+a weird encoding for special characters. 
+This may difficult `fzf` or `grep`, 
+but I do not think I am going to search words with special characters.
+
+I want to not store the big attachements.
+`mbsync` does not fully support this, as it only suports not downloading
+emails such that text+attachment > certain size.
+This implies that if the attachment is big, the text is not downloaded.
+To solve this, I have created a small bash script:
+```
+mkdir -p ~/config_files/email-archive
+cd ~/config_files/email-archive
+vim remove_big_files_from_mail-archive.sh
+```
+and add the following contents:
+```
+#!/bin/bash
+
+ARCHIVE_DIR="/srv_msata/mail-archive/gmail"
+
+echo "Starting mail archive cleanup: $(date)"
+
+# Find files larger than 5MB (5120 KB) and delete them
+# Target the 'cur' and 'new' directories inside Maildir
+find "$ARCHIVE_DIR" -type f -size +5M -name "*" -exec echo "Deleting large email: {}" \; -exec rm {} \;
+
+echo "Cleanup finished: $(date)"
+```
+Remeber to make it executable:
+```
+chmod +x remove_big_files_from_mail-archive.sh
+```
+
+Finally, I create a montly automatic syncromization:
+```
+vim ~/.config/systemd/user/mbsync-archive.service
+```
+with the following content:
+```
+[Unit]
+Description=Incremental Gmail Archive Sync
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/mbsync -Va
+ExecStartPost=/home/marc/config_files/email-archive/remove_big_files_from_mail-archive.sh
+```
+and create the timer:
+```
+vim ~/.config/systemd/user/mbsync-archive.timer
+```
+with the following content:
+```
+[Unit]
+Description=Run Gmail Archive Sync Monthly
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+And enable the job: 
+```
+systemctl --user daemon-reload
+systemctl --user enable --now mbsync-archive.timer
+```
+and check that it works:
+```
+systemctl --user status mbsync-archive.timer
+```
+
+Ok, there is a problem with `gnupg` because it requires to enter the passphrase.
+It is not ideal, but I am going to store my Gmail App Password as plain text in my server,
+but only make it visible for me:
+```
+echo "your-16-char-gmail-app-password" > ~/.mbsync-pw-gmail
+chmod 600 ~/.mbsync-pw-gmail
+```
+Then, I need to update `~/.mbsyncrc` with:
+```
+PassCmd "cat ~/.mbsync-pw-gmail"
+```
+Now it works.
+
