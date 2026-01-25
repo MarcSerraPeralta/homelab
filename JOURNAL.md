@@ -2291,7 +2291,7 @@ Channel gmail
 Far :gmail-remote:
 Near :gmail-local:
 # Only sync Inbox and Sent
-Patterns "INBOX" "[Gmail]/Sent Mail"
+Patterns "INBOX" "[Gmail]/Enviats"
 Create Near
 Expunge None
 Sync Pull
