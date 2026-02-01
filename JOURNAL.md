@@ -2394,3 +2394,18 @@ and I have removed the email archive directory in `/srv_msata`.
 The thing is that `mbsync` also stores the UIDVALIDITY files in `~/mbsync/`.
 The solution to the UIDVALIDITY problems is to remove the files inside `~/mbsync/`.l
 
+
+# 2026/01/29 - Update Immich to v2.5.0
+
+The newest version of Immich now supports "Free Up Space", 
+which allows to delete photos in the smartphone that have already been backed up in the server. 
+This is one of the features I want in issue [#17](https://github.com/MarcSerraPeralta/homelab/issues/17).
+Although it is not automatic, it is much better than what I would set up.
+
+I have updated Immich as follows:
+```
+docker compose pull && docker compose up -d
+docker image prune
+```
+Now I have v2.5.2 wich corresponds to a patched modification of v2.5.0.
+
