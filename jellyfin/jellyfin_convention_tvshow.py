@@ -83,7 +83,7 @@ for season in seasons:
     jellyfin_season_path = jellyfin_tvshow_path / new_season_name
     jellyfin_season_path.mkdir(exist_ok=True, parents=True)
 
-    episode_names = os.listdir(season_path)
+    episode_names = sorted(os.listdir(season_path))
     episodes = []
     for episode_name in episode_names:
         match = re.search(name_format, episode_name)

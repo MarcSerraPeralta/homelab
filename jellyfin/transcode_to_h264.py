@@ -19,7 +19,7 @@ args = parser.parse_args()
 
 DELETE_FILES = args.delete
 input_root = args.input_root
-output_root = input_root.parent / "hevc"
+output_root = input_root.parent / "h264"
 
 
 def get_codec(file_path: str | pathlib.Path) -> str:
@@ -47,7 +47,7 @@ for input_path, subdirs, files in os.walk(input_root):
             print("FILE ALREADY TRANSCODED")
             continue
 
-        if get_codec(input_file).lower() in ["hevc"]:
+        if get_codec(input_file).lower() in ["h264"]:
             if DELETE_FILES:
                 print("MOVING FILE...")
                 shutil.move(input_file, output_file)
