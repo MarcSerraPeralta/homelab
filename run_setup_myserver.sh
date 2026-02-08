@@ -135,3 +135,21 @@ mv /tmp/config_files/config_files/seasontracker/my_tracked_seasons.yaml $HOME/co
 mv /tmp/config_files/config_files/seasontracker/run_seasontracker.sh $HOME/config_files/seasontracker/run_seasontracker.sh
 chmod +x $HOME/config_files/seasontracker/run_seasontracker.sh
 (crontab -l 2>/dev/null; echo "0 8 1 * * /home/marc/config_files/seasontracker/run_seasontracker.sh") | crontab -
+
+# automatic email archive for gmail
+sudo apt install isync
+mv /tmp/config_files/.mbsyncrc /home/marc/.mbsyncrc
+echo "your-16-char-gmail-app-password" > $HOME/.mbsync-pw-gmail
+chmod 600 ~/.mbsync-pw-gmail
+mkdir -p $HOME/config_files/email-archive
+mv /tmp/config_files/email-archive/remove_big_files_from_mail-archive.sh $HOME/config_files/email-archive/remove_big_files_from_mail-archive.sh
+chmod +x $HOME/config_files/email-archive/remove_big_files_from_mail-archive.sh
+mkdir -p $HOME/.config/systemd/user/
+mv /tmp/config_files/mbsync-archive.service $HOME/.config/systemd/user/mbsync-archive.service
+mv /tmp/config_files/mbsync-archive.timer $HOME/.config/systemd/user/mbsync-archive.timer
+sudo mkdir -p /srv_msata/mail-archive/gmail
+sudo chown -R $USER:$USER /srv_msata/mail-archive
+chmod 700 /srv_msata/mail-archive
+systemctl --user daemon-reload
+systemctl --user enable --now mbsync-archive.timer
+

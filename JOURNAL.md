@@ -2394,6 +2394,38 @@ and I have removed the email archive directory in `/srv_msata`.
 The thing is that `mbsync` also stores the UIDVALIDITY files in `~/mbsync/`.
 The solution to the UIDVALIDITY problems is to remove the files inside `~/mbsync/`.l
 
+The working configuration for the `~/.mbsyncrc` is:
+```
+# GMAIL REMOTE STORAGE
+IMAPAccount gmail
+Host imap.gmail.com
+User marcserraperalta@gmail.com
+PassCmd "cat ~/.mbsync-pw-gmail"
+SSLType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+SSLVersions TLSv1.2
+Timeout 120
+
+IMAPStore gmail-remote
+Account gmail
+
+# LOCAL ARCHIVE STORAGE
+MaildirStore gmail-local
+SubFolders Verbatim
+Flatten .
+Path /srv_msata/mail-archive/gmail/
+Inbox /srv_msata/mail-archive/gmail/Inbox
+
+# ARCHIVE CHANNEL
+Channel gmail
+Far :gmail-remote:
+Near :gmail-local:
+Patterns "INBOX" "[Gmail]/Enviats"
+Create Near
+Expunge None
+Sync Pull
+```
+
 
 # 2026/01/29 - Update Immich to v2.5.0
 
