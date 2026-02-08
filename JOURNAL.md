@@ -2441,3 +2441,78 @@ docker image prune
 ```
 Now I have v2.5.2 wich corresponds to a patched modification of v2.5.0.
 
+
+# 2026/02/08 - Back up home server files in my personal computer
+
+See issue [#59](https://github.com/MarcSerraPeralta/homelab/issues/59) for the motivation
+and reasoning of the implementation.
+Here I just describe the commands to set it up.
+
+Because my home server is 24/7 active, I have created the service/timer in my laptop
+to back up the files in my home server. 
+Currently, I only need to back up my email archive, so the back-up script is just:
+```
+#!/usr/bin/bash
+
+set -euo pipefail
+
+REMOTE_HOST="100.100.50.50"
+LOGFILE="$HOME/.local/share/myserver-backup.log"
+
+mkdir -p "$(dirname "$LOGFILE")"
+
+# Abort quickly if server is unreachable
+if ! ping -c 1 -W 3 "$REMOTE_HOST" &>/dev/null; then
+    echo "$(date): Backup skipped – home server unreachable" >> "$LOGFILE"
+    exit 0
+fi
+
+# mail archive
+mkdir -p $HOME/Desktop/MOVE_TO_EXTERNAL_HDD/mail-archive/
+rsync -aAX --delete --numeric-ids "marc@${REMOTE_HOST}:/srv_msata/mail-archive/" $HOME/Desktop/MOVE_TO_EXTERNAL_HDD/mail-archive/ >> "$LOGFILE" 2>&1
+
+echo "$(date): Backup completed successfully" >> "$LOGFILE"
+```
+which I have stored in `/home/marc/usuari/custom/linux/backup_options/backup-from-myserver.sh`,
+and gave execution permissions.
+
+I have also created the following service and timer:
+- `~/.config/systemd/user/myserver-backup.service`
+```
+[Unit]
+Description=Automatic home server backup to laptop
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/usuari/custom/linux/backup_options/backup-from-myserver.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+```
+- `~/.config/systemd/user/myserver-backup.timer`
+```
+[Unit]
+Description=Run home server backup automatically
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=7d
+Persistent=true
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target
+```
+and activated with:
+```
+systemctl --user daemon-reload
+systemctl --user enable --now myserver-backup.timer
+```
+and check that it is working correctly:
+```
+systemctl --user list-timers
+systemctl --user status myserver-backup.service
+```
+
