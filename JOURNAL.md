@@ -2516,3 +2516,19 @@ systemctl --user list-timers
 systemctl --user status myserver-backup.service
 ```
 
+
+# 2026/04/05 - Moving Immich assets from internal library to external library
+
+I have implemented a similar solution to what was described in issue [#17](https://github.com/MarcSerraPeralta/homelab/issues/17).
+The complete description can be found in `config_files/config_files/immich-scripts/README.md`.
+
+After copying all files in `immich-scripts/`, I have run the following commands:
+```
+sudo usermod -aG systemd-journal marc
+newgrp systemd-journal
+sudo chmod -R g+rwX /srv/immich/internal_library
+sudo chmod g+s /srv/immich/internal_library
+chmod +x $HOME/config_files/immmich-scripts/run_script.sh
+(crontab -l 2>/dev/null; echo "0 4 2 * * /home/marc/config_files/immich-scripts/run_script.sh") | crontab -
+```
+to automatically run the script at 4am every month on day 2.

@@ -138,7 +138,7 @@ chmod +x $HOME/config_files/seasontracker/run_seasontracker.sh
 
 # automatic email archive for gmail
 sudo apt install isync
-mv /tmp/config_files/.mbsyncrc /home/marc/.mbsyncrc
+mv /tmp/config_files/.mbsyncrc $HOME/.mbsyncrc
 echo "your-16-char-gmail-app-password" > $HOME/.mbsync-pw-gmail
 chmod 600 ~/.mbsync-pw-gmail
 mkdir -p $HOME/config_files/email-archive
@@ -153,3 +153,14 @@ chmod 700 /srv_msata/mail-archive
 systemctl --user daemon-reload
 systemctl --user enable --now mbsync-archive.timer
 
+# automatic Immich asset transfer from internal to external library
+mkdir $HOME/config_files/immich-scripts
+mv /tmp/config_files/config_files/immich-scripts/ $HOME/config_files/immich-scripts/
+chmod +x $HOME/config_files/immich-scripts/run_script.sh
+# give me permissions to edit internal library
+sudo usermod -aG systemd-journal $USER
+newgrp systemd-journal
+sudo chmod -R g+rwX /srv/immich/internal_library
+sudo chmod g+s /srv/immich/internal_library
+# set up monthly script
+(crontab -l 2>/dev/null; echo "0 4 2 * * /home/marc/config_files/immich-scripts/run_script.sh") | crontab -
