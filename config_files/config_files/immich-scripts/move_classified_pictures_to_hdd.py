@@ -1,4 +1,5 @@
 from pathlib import Path
+import time
 from datetime import datetime
 import requests
 
@@ -14,6 +15,14 @@ HOST_EXTERNAL_ROOT = "/srv/immich/external_library"
 DRY_RUN = True
 
 SKIP_ALBUMS = ["WhatsApp Video", "WhatsApp Images", "Camera", "BeReal"]
+
+CUSTOM_ALBUMS = {
+    "nuria": "persones/nuria",
+    "pau_martinez": "persones/pau_martinez",
+    "phd": "phd",
+    "family": "family",
+    "bereal": "bereal",
+}
 
 
 # load API key
@@ -134,6 +143,23 @@ def print_v(string: str):
     return
 
 
+def wait_until_rescan_complete():
+    while True:
+        r = requests.get(f"{IMMICH_URL}/jobs", headers=HEADERS)
+        r.raise_for_status()
+
+        jobs = r.json()
+        library: dict[str, int] = jobs.get("library", {}).get("jobCounts", {})
+
+        active = library.get("active", 0)
+        waiting = library.get("waiting", 0)
+
+        if active == 0 and waiting == 0:
+            return
+
+        time.sleep(5)
+
+
 if __name__ == "__main__":
     print_v("Checking root paths...")
     check_root_paths()
@@ -152,7 +178,7 @@ if __name__ == "__main__":
         album_name = album["albumName"]
         if album_name in SKIP_ALBUMS:
             continue
-        if not is_valid_album_name(album_name):
+        if (not is_valid_album_name(album_name)) and (album_name not in CUSTOM_ALBUMS):
             continue
 
         album_id = album["id"]
@@ -168,6 +194,8 @@ if __name__ == "__main__":
                 asset_path_to_album[asset_path] = (asset_id, None)
                 continue
 
+            if album_name in CUSTOM_ALBUMS:
+                album_name = CUSTOM_ALBUMS[album_name]
             asset_path_to_album[asset_path] = (asset_id, album_name)
     print_v("Done")
 
@@ -188,4 +216,5 @@ if __name__ == "__main__":
     if not DRY_RUN:
         print_v("Scanning Immich libraries...")
         immich_external_library_rescan()
+        wait_until_rescan_complete()
         print_v("Done")

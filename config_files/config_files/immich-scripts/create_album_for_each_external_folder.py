@@ -11,6 +11,14 @@ HOST_EXTERNAL_ROOT = "/srv/immich/external_library"
 
 DRY_RUN = True
 
+CUSTOM_ALBUMS = {
+    "nuria": "persones/nuria",
+    "pau_martinez": "persones/pau_martinez",
+    "phd": "phd",
+    "family": "family",
+    "bereal": "bereal",
+}
+
 
 # load API key
 with open(API_KEY_FILE, "r") as file:
@@ -66,7 +74,7 @@ def print_v(string: str):
 
 if __name__ == "__main__":
     immich_albums = get_immich_album_names()
-    external_albums = get_external_album_names()
+    external_albums = get_external_album_names() + list(CUSTOM_ALBUMS)
     missing_external_albums = set(external_albums).difference(immich_albums)
 
     for album in sorted(missing_external_albums):
