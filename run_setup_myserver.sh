@@ -164,3 +164,8 @@ sudo chmod -R g+rwX /srv/immich/internal_library
 sudo chmod g+s /srv/immich/internal_library
 # set up monthly script
 (crontab -l 2>/dev/null; echo "0 4 2 * * /home/marc/config_files/immich-scripts/run_script.sh") | crontab -
+
+# install unbound
+sudo apt install unbound
+sudo mv /tmp/config_files/pi-hole.conf /etc/unbound/unbound.conf.d/
+sudo service unbound restart

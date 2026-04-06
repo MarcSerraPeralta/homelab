@@ -2532,3 +2532,20 @@ chmod +x $HOME/config_files/immmich-scripts/run_script.sh
 (crontab -l 2>/dev/null; echo "0 4 2 * * /home/marc/config_files/immich-scripts/run_script.sh") | crontab -
 ```
 to automatically run the script at 4am every month on day 2.
+
+
+# 2026/04/06 - Installing local DNS resolver (`unbound`)
+
+I am currently using Cloudflare to resolve the DNS requests.
+To avoid DNS resolvers like Google or Cloudflare to be able to track my DNS queries,
+I am installing a local DNS resolver, i.e. `unbound`.
+I am following the steps in the [pi-hole documentation](https://docs.pi-hole.net/guides/dns/unbound/) for installing `unbound`.
+The steps are very clear and easy to follow. 
+It worked on the first try without any error.
+
+I have added the configuration file for `unbound` in `config_files`.
+
+I have also updated `pihole` using:
+```
+sudo pihole -up
+```
