@@ -4,8 +4,8 @@
 - Pictures in an internal library are classified by adding them to albums (via phone or web).
 - Every month, the classified pictures in the internal library are moved to my external library,
 and deleted from the Immich internal library database (not from phone). See below.
-- Pictures in my phone are deleted from my phone if they are more than 1 year old 
-and are not in 'Favourites' (`Free Up Space` method in Immich).
+- Pictures in my phone can be manually deleted from my phone by filtering them by age,
+e.g. if they are more than 1 year old.
 - Unclassified pictures in internal library can be obtained by checking the albums
 e.g. 'Camera', 'WhatsApp Images' (created by `Backup` method if `Sync Albums` enabled).
 This can be used to delete unclassified pictures from the internal libray.
@@ -53,3 +53,10 @@ sudo chmod g+s /srv/immich/internal_library
 
 If the newly created albums do not appear in Immich (via phone), click on the
 `Backup` icon in the Home page and wait until everything has updated.
+
+The `Free Space` feature in Immich does not work in my set up because
+the Immich assets from my phone are deleted. Immich can no longer track the assets
+for the `Free Space` feature because they are deleted. 
+If I do not delete the asset they will appear duplicate, 
+i.e. one for the interal library and one for the external library,
+doubling the disk space usage.
