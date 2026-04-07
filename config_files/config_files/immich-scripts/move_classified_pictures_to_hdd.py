@@ -24,6 +24,8 @@ CUSTOM_ALBUMS = {
     "bereal": "bereal",
 }
 
+LOG_FILE = "/home/marc/config_files/immich-scripts/log.txt"
+
 
 # load API key
 with open(API_KEY_FILE, "r") as file:
@@ -139,7 +141,13 @@ def check_immich_is_reachable():
 
 
 def print_v(string: str):
-    print(f"{datetime.now()} {string}")
+    string = f"{datetime.now()} {string}\n"
+
+    print(string, end="")
+
+    Path(LOG_FILE).parent.mkdir(exist_ok=True, parents=True)
+    with open(LOG_FILE, "w") as file:
+        _ = file.write(string)
     return
 
 

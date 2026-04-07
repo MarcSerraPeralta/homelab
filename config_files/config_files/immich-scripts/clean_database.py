@@ -10,16 +10,13 @@ HOST_INTERNAL_ROOT = "/srv/immich/internal_library"
 
 DRY_RUN = True
 
+LOG_FILE = "/home/marc/config_files/immich-scripts/log.txt"
+
 
 # load API key
 with open(API_KEY_FILE, "r") as file:
     API_KEY = file.read()[:-1]
 HEADERS = {"x-api-key": API_KEY}
-
-
-def get_jobs():
-    r = requests.get(f"{IMMICH_URL}/jobs", headers=HEADERS)
-    print(r.json())
 
 
 def translate_docker_path(docker_path: str) -> Path:
@@ -44,7 +41,13 @@ def delete_asset(asset_id: str):
 
 
 def print_v(string: str):
-    print(f"{datetime.now()} {string}")
+    string = f"{datetime.now()} {string}\n"
+
+    print(string, end="")
+
+    Path(LOG_FILE).parent.mkdir(exist_ok=True, parents=True)
+    with open(LOG_FILE, "w") as file:
+        _ = file.write(string)
     return
 
 
