@@ -2549,3 +2549,9 @@ I have also updated `pihole` using:
 ```
 sudo pihole -up
 ```
+
+
+# 2026/04/07 - Activate Windows
+
+I activated Windows in my gaming PC following [this guide](https://massgrave.dev/).
+
