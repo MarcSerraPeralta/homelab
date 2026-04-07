@@ -9,7 +9,7 @@ API_KEY_FILE = ".env"
 DOCKER_EXTERNAL_ROOT = "/external"
 HOST_EXTERNAL_ROOT = "/srv/immich/external_library"
 
-DRY_RUN = True
+DRY_RUN = False
 
 CUSTOM_ALBUMS = {
     "nuria": "persones/nuria",

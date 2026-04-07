@@ -12,7 +12,7 @@ HOST_INTERNAL_ROOT = "/srv/immich/internal_library"
 DOCKER_EXTERNAL_ROOT = "/external"
 HOST_EXTERNAL_ROOT = "/srv/immich/external_library"
 
-DRY_RUN = True
+DRY_RUN = False
 
 SKIP_ALBUMS = ["WhatsApp Video", "WhatsApp Images", "Camera", "BeReal"]
 

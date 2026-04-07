@@ -8,7 +8,7 @@ API_KEY_FILE = ".env"
 DOCKER_INTERNAL_ROOT = "/data"
 HOST_INTERNAL_ROOT = "/srv/immich/internal_library"
 
-DRY_RUN = True
+DRY_RUN = False
 
 LOG_FILE = "/home/marc/config_files/immich-scripts/log.txt"
 
