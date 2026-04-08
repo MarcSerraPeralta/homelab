@@ -2555,3 +2555,15 @@ sudo pihole -up
 
 I activated Windows in my gaming PC following [this guide](https://massgrave.dev/).
 
+
+# 2026/04/08 - Solve issue with `pihole` + `unbound`
+
+After installing unbound, I started seeing ads that were previously blocked by `pihole`.
+I believe this was caused by the fact that `unbound` had IPv6 enabled.
+After changing the its configuration, I have restarted it and flushed the DNS entries from `pihole`:
+```
+sudo systemctl restart unbound
+sudo pihole reloaddns
+```
+and the ads were blocked again by `pihole`.
+
