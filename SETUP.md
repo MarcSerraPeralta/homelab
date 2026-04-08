@@ -113,3 +113,21 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 
 ![Alt text](./setup_media/20251213.png?raw=true)
 
+
+# 2026/04/06
+
+- Ad-blocker at home (`pihole`)
+- Ad-blocker outside home (`pihole` + `tailscale`)
+- Self-hosted "Google Photos" (`immich`)
+- Self-hosted "Netflix" (`jellyfin`)
+- Self-hosted "Spotify" (`jellyfin` + `finamp`)
+- New TV-show season notificator (`seasontracker`)
+- Easy-to-type websites (e.g. `jellyfin.home`) to access self-hosted services (`caddy`)
+- Setup to download "linux ISOs" in my laptop (`qbittorrent` + `protonvpn`)
+- :new: Self-hosted DNS resolver (`unbound`)
+- Access LAN devices and self-hosted services from outside home (`tailscale`)
+- Monitor stats of home server, immich, and jellyfin (`grafana`)
+- Security camera
+
+![Alt text](./setup_media/20260406.png?raw=true)
+
