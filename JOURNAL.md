@@ -2567,3 +2567,114 @@ sudo pihole reloaddns
 ```
 and the ads were blocked again by `pihole`.
 
+
+# 2026/04/12 - Exploring Tailscale TLS certificates
+
+I have recently discovered that Tailscale allows one to handle TLS certificates easily.
+Currently, I use caddy to generate a local certificate that I need to install in all devices
+if I do not want to deal with the browser's warnings saying that the connection is not secure.
+This solution easily works for Linux but it has some problems in macOS and Windows, because
+certificates are not handled that nicely.
+
+The Tailscale solution is very neat if one does not own a domain name.
+I currently do not own a domain name, but I am planning of owning one as 
+it can costs a little less than 1€/month using reputable sources (i.e., Cloudflare).
+If one has MagicDNS and HTTPS certificates enabled in Tailscale, one can get
+the following domain `yourserver.tailnet-name.ts.net` and Tailscale will issue a real certificate.
+Note that the tailnet name can be changed but it is not customizable.
+How this works is the following:
+```
+Let's Encrypt --> signs cert --> ts.net domain --> trusted globally
+```
+which then works across everything and does not need to install local certificates.
+
+I have chosen the following tailnet name: `piranha-wall`.
+Then I have enabled HTTPS certificates in my Tailscale.
+On my server, I have run
+```
+sudo tailscale cert myserver.piranha-wall.ts.net
+```
+which created two files:
+```
+myserver.piranha-wall.ts.net.crt
+myserver.piranha-wall.ts.net.key
+```
+and moved to `~/config_files/tailscale/` with:
+```
+sudo mkdir -p /etc/caddy/certs
+sudo mv *.crt /etc/caddy/certs/
+sudo mv *.key /etc/caddy/certs/
+sudo chown root:caddy /etc/caddy/certs/*
+sudo chmod 640 /etc/caddy/certs/*
+```
+Then, I have updated the `etc/caddy/Caddyfile` file to:
+```
+# The Caddyfile is an easy way to configure your Caddy web server.                                                                       
+#                                                                                                                                        
+# Unless the file starts with a global options block, the first                                                                          
+# uncommented line is always the address of your site.                                                                                   
+#                                                                                                                                        
+# To use your own domain name (with automatic HTTPS), first make                                                                         
+# sure your domain's A/AAAA DNS records are properly pointed to                                                                          
+# this machine's public IP, then replace ":80" below with your                                                                           
+# domain name.                                                                                                                           
+                                                                                                                                         
+:80 {                                                                                                                                    
+        # Set this path to your site's directory.                                                                                        
+        root * /usr/share/caddy                                                                                                          
+                                                                                                                                         
+        # Enable the static file server.                                                                                                 
+        file_server                                                                                                                      
+
+        # Another common task is to set up a reverse proxy:
+        # reverse_proxy localhost:8080
+
+        # Or serve a PHP site through php-fpm:
+        # php_fastcgi localhost:9000
+}
+
+# Refer to the Caddy docs for more information:
+# https://caddyserver.com/docs/caddyfile
+
+pihole.myserver.piranha-wall.ts.net {
+        tls /etc/caddy/certs/myserver.piranha-wall.ts.net.crt /etc/caddy/certs/myserver.piranha-wall.ts.net.key
+        @root path /
+        rewrite @root /admin
+
+        reverse_proxy 192.168.0.50:8080
+}
+
+
+jellyfin.myserver.piranha-wall.ts.net {
+        tls /etc/caddy/certs/myserver.piranha-wall.ts.net.crt /etc/caddy/certs/myserver.piranha-wall.ts.net.key
+        reverse_proxy 192.168.0.50:8096
+}
+
+immich.myserver.piranha-wall.ts.net {
+        tls /etc/caddy/certs/myserver.piranha-wall.ts.net.crt /etc/caddy/certs/myserver.piranha-wall.ts.net.key
+        reverse_proxy 100.100.50.50:2283
+}
+
+grafana.myserver.piranha-wall.ts.net {
+        tls /etc/caddy/certs/myserver.piranha-wall.ts.net.crt /etc/caddy/certs/myserver.piranha-wall.ts.net.key
+        reverse_proxy 100.100.50.50:3000
+}
+```
+and restarted caddy:
+```
+sudo systemctl restart caddy
+```
+
+Here, I realized the problem with Tailscale HTTPS certificates and my setup.
+I have a single machine that hosts serveral services.
+Tailscale only creates a certificate for `myserver.piranha-wall.ts.net`, 
+and does not work for its subdomains (e.g., `grafana.myserver.piranha-wall.ts.net`. 
+I have tried creating a subdomain certificate with
+```
+tailscale cert grafana.myserver.piranha-wall.ts.net
+```
+but it does not allow me.
+A solution is to host my services at `myserver.piranha-wall.ts.net/grafana`,
+but I much rather prefer the link starting with `grafana....` to have nice autocompletion.
+I have reverted the changes in the `Caddyfile` file and restared caddy.
+
