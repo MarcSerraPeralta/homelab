@@ -9,7 +9,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - :new: Ad-blocker at home (`pihole`)
 - :new: Ad-blocker outside home (`pihole` + `tailscale`)
 
-![Alt text](./setup_media/20251009.png?raw=true)
+![Alt text](./setup_media/20251009.svg)
 
 
 # 2025/10/16
@@ -18,7 +18,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Ad-blocker outside home (`pihole` + `tailscale`)
 - :new: Access LAN devices from outside home (`tailscale`)
 
-![Alt text](./setup_media/20251016.png?raw=true)
+![Alt text](./setup_media/20251016.svg)
 
 
 # 2025/10/26
@@ -28,7 +28,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Access LAN devices and self-hosted services from outside home (`tailscale`)
 - :new: Monitor CPU temperature of home server (`grafana`)
 
-![Alt text](./setup_media/20251026.png?raw=true)
+![Alt text](./setup_media/20251026.svg)
 
 
 # 2025/10/30
@@ -39,7 +39,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Access LAN devices and self-hosted services from outside home (`tailscale`)
 - Monitor CPU temperature of home server (`grafana`)
 
-![Alt text](./setup_media/20251030.png?raw=true)
+![Alt text](./setup_media/20251030.svg)
 
 
 # 2025/11/01
@@ -51,7 +51,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Monitor CPU temperature of home server and Immich (`grafana`)
 - :new: Security camera
 
-![Alt text](./setup_media/20251101.png?raw=true)
+![Alt text](./setup_media/20251101.svg)
 
 
 # 2025/11/06
@@ -64,7 +64,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Monitor CPU temperature of home server and Immich (`grafana`)
 - Security camera
 
-![Alt text](./setup_media/20251106.png?raw=true)
+![Alt text](./setup_media/20251106.svg)
 
 
 # 2025/11/16
@@ -78,7 +78,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Monitor CPU temperature of home server and Immich (`grafana`)
 - Security camera
 
-![Alt text](./setup_media/20251116.png?raw=true)
+![Alt text](./setup_media/20251116.svg)
 
 
 # 2025/11/26
@@ -94,7 +94,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Monitor CPU temperature of home server and Immich (`grafana`)
 - Security camera
 
-![Alt text](./setup_media/20251126.png?raw=true)
+![Alt text](./setup_media/20251126.svg)
 
 
 # 2025/12/13
@@ -111,7 +111,7 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Monitor stats of home server, immich, and jellyfin (`grafana`)
 - Security camera
 
-![Alt text](./setup_media/20251213.png?raw=true)
+![Alt text](./setup_media/20251213.svg)
 
 
 # 2026/04/06
@@ -129,5 +129,5 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 - Monitor stats of home server, immich, and jellyfin (`grafana`)
 - Security camera
 
-![Alt text](./setup_media/20260406.png?raw=true)
+![Alt text](./setup_media/20260406.svg)
 
