@@ -2678,3 +2678,126 @@ A solution is to host my services at `myserver.piranha-wall.ts.net/grafana`,
 but I much rather prefer the link starting with `grafana....` to have nice autocompletion.
 I have reverted the changes in the `Caddyfile` file and restared caddy.
 
+
+# 2026/05/02 - Owning and setting up a domain name
+
+I have followed the instructions from [this Youtube video](https://www.youtube.com/watch?v=WdTpWYTPcm8)
+on how to buy a domain name from Cloudflare. 
+I have chosen Cloudflare because the price is around 1€/month (cheap) and it is a respectable busines:
+I can trust that Cloudflare will not try to sell my data, increase the price for renewal...
+
+I have bought `servidoret.com`.
+
+To set it up so that I do not have to expose my home server to the Internet, 
+I am following the instructions from [this Youtube video](https://www.youtube.com/watch?v=qlcVx-k-02E&t=3s).
+The trick is setting up DNS verification for the certificates.
+This allows having the valid SSL certificates without having to expose my home server.
+
+In Cloudflare, I have added the following records for `servidoret.com`:
+- Type: `A`, Name: `servidoret.com`, IPv4 addres: `100.100.50.50`, Proxy status: `DNS only (reserved IP)`, TTL: `Auto`.
+- Type: `CNAME`, Name: `*`, Target: `servidoret.com`, Proxy status: `Off (DNS only)`, TTL: `Auto`.
+
+I have also created a token (`Profile > API Tokens`) with the `Edit zone DNS` template:
+```
+Edit zone DNS API token summary
+
+This API token will affect the below accounts and zones, along with their respective permissions
+
+    Marcserraperalta@gmail.com's Account
+        servidoret.com - DNS:Edit
+```
+
+In my server, I need to install the Cloudflare DNS extension to Caddy:
+```
+sudo apt install golang-go
+go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+
+mkdir ~/caddy-build
+cd ~/caddy-build
+~/go/bin/xcaddy build --with github.com/caddy-dns/cloudflare
+# check that it works:
+# ./caddy list-modules | grep cloudflare
+
+sudo systemctl stop caddy
+sudo cp ./caddy /usr/bin/caddy
+sudo systemctl start caddy
+
+cd ~
+rm -r ~/caddy-build/
+sudo rm -r ~/go/
+
+sudo mkdir -p /etc/systemd/system/caddy.service.d
+sudo vim /etc/systemd/system/caddy.service.d/env.conf
+# Add
+# [Service]
+# Environment=CLOUDFLARE_API_TOKEN=your_token_here
+sudo systemctl daemon-reload
+sudo systemctl restart caddy
+# check that it works with:
+# systemctl show caddy | grep CLOUDFLARE
+```
+
+In my server, I have edited the `/etc/caddy/Caddyfile` file to:
+```
+servidoret.com {
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+        }
+
+        # Set this path to your site's directory.                                                                                        
+        root * /usr/share/caddy                                                                                                          
+                                                                                                                                         
+        # Enable the static file server.                                                                                                 
+        file_server                                                                                                                      
+
+        # Another common task is to set up a reverse proxy:
+        # reverse_proxy localhost:8080
+
+        # Or serve a PHP site through php-fpm:
+        # php_fastcgi localhost:9000
+}
+
+pihole.servidoret.com {
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+        }
+
+        @root path /
+        rewrite @root /admin
+
+        reverse_proxy 192.168.0.50:8080
+}
+
+
+jellyfin.servidoret.com {
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+        }
+        reverse_proxy 192.168.0.50:8096
+}
+
+immich.servidoret.com {
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+        }
+        reverse_proxy 100.100.50.50:2283
+}
+
+grafana.servidoret.com {
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+        }
+        reverse_proxy 100.100.50.50:3000
+}
+```
+
+Then, I restart Caddy:
+```
+sudo systemctl restart caddy
+```
+
+I can see all the subdomains correctly, however I cannot see the `servidoret.com`
+website (which is the Caddy welcome page).
+If I remove the `tls` block inside the `servidoret.com` block, the website loads
+with HTTP (no HTTPS).
+

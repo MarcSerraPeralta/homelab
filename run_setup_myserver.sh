@@ -169,3 +169,28 @@ sudo chmod g+s /srv/immich/internal_library
 sudo apt install unbound
 sudo mv /tmp/config_files/pi-hole.conf /etc/unbound/unbound.conf.d/
 sudo service unbound restart
+
+# set up domain name
+sudo apt install golang-go
+go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+mkdir ~/caddy-build
+cd ~/caddy-build
+~/go/bin/xcaddy build --with github.com/caddy-dns/cloudflare
+# check that it works:
+# ./caddy list-modules | grep cloudflare
+sudo systemctl stop caddy
+sudo cp ./caddy /usr/bin/caddy
+sudo systemctl start caddy
+cd ~
+rm -r ~/caddy-build/
+sudo rm -r ~/go/
+sudo mkdir -p /etc/systemd/system/caddy.service.d
+sudo vim /etc/systemd/system/caddy.service.d/env.conf
+# Add
+# [Service]
+# Environment=CLOUDFLARE_API_TOKEN=your_token_here
+sudo systemctl daemon-reload
+sudo systemctl restart caddy
+# check that it works with:
+# systemctl show caddy | grep CLOUDFLARE
+
