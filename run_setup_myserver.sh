@@ -194,3 +194,7 @@ sudo systemctl restart caddy
 # check that it works with:
 # systemctl show caddy | grep CLOUDFLARE
 
+# set up home page for domain
+sudo mkdir /var/www/homepage
+mv /tmp/config_files/config_files/homepage/ /var/www/homepage/
+sudo systemctl restart caddy

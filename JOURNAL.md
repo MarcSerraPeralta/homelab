@@ -2795,9 +2795,53 @@ Then, I restart Caddy:
 ```
 sudo systemctl restart caddy
 ```
+I have also formatted the Caddy file using:
+```
+sudo caddy fmt --config /etc/caddy/Caddyfile --overwrite
+# caddy validate --config /etc/caddy/Caddyfile # to validate it
+```
 
 I can see all the subdomains correctly, however I cannot see the `servidoret.com`
 website (which is the Caddy welcome page).
 If I remove the `tls` block inside the `servidoret.com` block, the website loads
 with HTTP (no HTTPS).
 
+I believe the problem above was due to the browser, because I have restarted my
+laptop and now the `servidoret.com` (Caddy's landing page) works with HTTPS.
+
+
+# 2026/05/03 - Setting up a landing page for `servidoret.com`
+
+Store the website and icons in:
+```
+sudo mkdir /var/www/homepage
+sudo mkdir /var/www/homepage/icons
+```
+and edit the Caddy file to point to that website:
+```
+servidoret.com {
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+        }
+
+        # Set this path to your site's directory.                                                                                        
+        root * /var/www/homepage
+                                                                                                                                         
+        # Enable the static file server.                                                                                                 
+        file_server                                                                                                                      
+
+        # Another common task is to set up a reverse proxy:
+        # reverse_proxy localhost:8080
+
+        # Or serve a PHP site through php-fpm:
+        # php_fastcgi localhost:9000
+}
+```
+
+Then I have added the file `index.html` to `/var/www/homepage/` (see `config_files/homepage`).
+And I have also added the icons in the `icons/` subdirectory.
+
+Finally, I have restarted Caddy:
+```
+sudo systemctl restart caddy
+```

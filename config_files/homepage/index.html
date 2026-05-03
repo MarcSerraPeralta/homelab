@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Home Server</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    h1 {
+        margin-bottom: 2rem;
+        font-weight: 600;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.6rem;
+        width: min(700px, 90%);
+    }
+
+    .card {
+        aspect-ratio: 0.9 / 1;
+        background: #1e293b;
+        border-radius: 8px;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        border: 1px solid #334155;
+        transition: 0.2s ease;
+        padding: 1rem;
+    }
+
+    .card:hover {
+        background: #334155;
+        transform: translateY(-4px);
+    }
+
+    .icon {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+    }
+
+    .title {
+        font-size: 1rem;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    @media (prefers-color-scheme: light) {
+        body {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<h1>Servidoret</h1>
+
+<div class="grid">
+
+    <a class="card" href="https://jellyfin.servidoret.com">
+        <img class="icon" src="icons/jellyfin.svg" alt="Jellyfin">
+        <div class="title">Jellyfin</div>
+    </a>
+
+    <a class="card" href="https://immich.servidoret.com">
+        <img class="icon" src="icons/immich.svg" alt="Immich">
+        <div class="title">Immich</div>
+    </a>
+
+    <a class="card" href="https://grafana.servidoret.com">
+        <img class="icon" src="icons/grafana.svg" alt="Grafana">
+        <div class="title">Grafana</div>
+    </a>
+
+    <a class="card" href="https://pihole.servidoret.com">
+        <img class="icon" src="icons/pihole.svg" alt="Pi-hole">
+        <div class="title">Pi-hole</div>
+    </a>
+
+    <a class="card" href="https://tailscale.com">
+        <img class="icon" src="icons/tailscale.svg" alt="Tailscale">
+        <div class="title">Tailscae</div>
+    </a>
+    
+    <a class="card" href="http://192.168.0.1">
+        <img class="icon" src="icons/router.svg" alt="Router">
+        <div class="title">Router</div>
+    </a>
+
+
+</div>
+
+</body>
+</html>
