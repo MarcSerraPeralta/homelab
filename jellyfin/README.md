@@ -5,6 +5,8 @@ List of metadata providers for the Jellyfin libraries:
 - **Anime**: anidb
 - **Music**: musicbrainz
 
+**A good way to find Linux ISOs is to use the `DuckDuckGo` search engine.**
+
 ## TV Shows
 
 Follow this steps for TV shows that have more than just one season.
