@@ -30,6 +30,12 @@
       "version": ""
     },
     {
+      "type": "panel",
+      "id": "trend",
+      "name": "Trend",
+      "version": ""
+    },
+    {
       "type": "datasource",
       "id": "yesoreyeram-infinity-datasource",
       "name": "Infinity",
@@ -940,18 +946,38 @@
       "title": "Temperature",
       "transformations": [
         {
+          "id": "calculateField",
+          "options": {
+            "alias": "datetime",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "date"
+                }
+              },
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "time"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
           "id": "convertFieldType",
           "options": {
             "conversions": [
               {
-                "dateFormat": "hh:mm:ss",
+                "dateFormat": "YYYY-MM-DDhh:mm:ss",
                 "destinationType": "time",
-                "targetField": "time"
-              },
-              {
-                "dateFormat": "YYYY-MM-DD",
-                "destinationType": "time",
-                "targetField": "date"
+                "targetField": "datetime"
               }
             ],
             "fields": {}
@@ -963,7 +989,7 @@
             "include": {
               "names": [
                 "Temperature",
-                "time"
+                "datetime"
               ]
             }
           }
@@ -1127,18 +1153,37 @@
       "title": "CO2",
       "transformations": [
         {
+          "id": "calculateField",
+          "options": {
+            "alias": "datetime",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "date"
+                }
+              },
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "time"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
           "id": "convertFieldType",
           "options": {
             "conversions": [
               {
-                "dateFormat": "hh:mm:ss",
+                "dateFormat": "YYYY-MM-DDhh:mm:ss",
                 "destinationType": "time",
-                "targetField": "time"
-              },
-              {
-                "dateFormat": "YYYY-MM-DD",
-                "destinationType": "time",
-                "targetField": "date"
+                "targetField": "datetime"
               }
             ],
             "fields": {}
@@ -1150,7 +1195,7 @@
             "include": {
               "names": [
                 "CO2",
-                "time"
+                "datetime"
               ]
             }
           }
@@ -1314,18 +1359,37 @@
       "title": "Humidity",
       "transformations": [
         {
+          "id": "calculateField",
+          "options": {
+            "alias": "datetime",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "date"
+                }
+              },
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "time"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
           "id": "convertFieldType",
           "options": {
             "conversions": [
               {
-                "dateFormat": "hh:mm:ss",
+                "dateFormat": "YYYY-MM-DDhh:mm:ss",
                 "destinationType": "time",
-                "targetField": "time"
-              },
-              {
-                "dateFormat": "YYYY-MM-DD",
-                "destinationType": "time",
-                "targetField": "date"
+                "targetField": "datetime"
               }
             ],
             "fields": {}
@@ -1337,7 +1401,7 @@
             "include": {
               "names": [
                 "Humidity",
-                "time"
+                "datetime"
               ]
             }
           }
@@ -1501,18 +1565,37 @@
       "title": "Presure",
       "transformations": [
         {
+          "id": "calculateField",
+          "options": {
+            "alias": "datetime",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "date"
+                }
+              },
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "time"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
           "id": "convertFieldType",
           "options": {
             "conversions": [
               {
-                "dateFormat": "hh:mm:ss",
+                "dateFormat": "YYYY-MM-DDhh:mm:ss",
                 "destinationType": "time",
-                "targetField": "time"
-              },
-              {
-                "dateFormat": "YYYY-MM-DD",
-                "destinationType": "time",
-                "targetField": "date"
+                "targetField": "datetime"
               }
             ],
             "fields": {}
@@ -1524,7 +1607,7 @@
             "include": {
               "names": [
                 "Pressure",
-                "time"
+                "datetime"
               ]
             }
           }
@@ -1557,10 +1640,10 @@
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
-                "axisPlacement": "auto",
+                "axisPlacement": "left",
                 "barAlignment": 0,
                 "barWidthFactor": 0.6,
-                "drawStyle": "line",
+                "drawStyle": "points",
                 "fillOpacity": 0,
                 "gradientMode": "none",
                 "hideFrom": {
@@ -1571,7 +1654,7 @@
                 "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
-                "pointSize": 5,
+                "pointSize": 2,
                 "scaleDistribution": {
                   "type": "linear"
                 },
@@ -1608,9 +1691,36 @@
                     "value": 30
                   }
                 ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Temperature",
+                  "scope": "series"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "celsius"
+                  }
+                ]
               },
-              "unit": "celsius"
-            }
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "total_seconds",
+                  "scope": "series"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 9,
@@ -1618,24 +1728,22 @@
             "x": 0,
             "y": 37
           },
+          "hideTimeOverride": false,
           "id": 10,
           "maxDataPoints": 10080,
           "options": {
-            "annotations": {
-              "clustering": -1,
-              "multiLane": false
-            },
             "legend": {
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
-            }
+            },
+            "xField": "total_seconds"
           },
           "pluginVersion": "13.0.1",
           "targets": [
@@ -1693,27 +1801,9 @@
               }
             }
           ],
-          "timeFrom": "7d",
+          "timeFrom": "1d",
           "title": "Temperature",
           "transformations": [
-            {
-              "id": "convertFieldType",
-              "options": {
-                "conversions": [
-                  {
-                    "dateFormat": "hh:mm:ss",
-                    "destinationType": "time",
-                    "targetField": "time"
-                  },
-                  {
-                    "dateFormat": "YYYY-MM-DD",
-                    "destinationType": "time",
-                    "targetField": "date"
-                  }
-                ],
-                "fields": {}
-              }
-            },
             {
               "id": "filterFieldsByName",
               "options": {
@@ -1724,9 +1814,230 @@
                   ]
                 }
               }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "minutes",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "right": {
+                    "fixed": "0"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "right": {
+                    "fixed": "0"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "destinationType": "string",
+                    "targetField": "minutes"
+                  },
+                  {
+                    "destinationType": "string",
+                    "targetField": "seconds"
+                  }
+                ],
+                "fields": {}
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "time",
+                "substringEnd": 2
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "minutes",
+                "substringEnd": 5,
+                "substringStart": 3
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "seconds",
+                "substringEnd": 8,
+                "substringStart": 6
+              }
+            },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "destinationType": "number",
+                    "targetField": "time"
+                  },
+                  {
+                    "destinationType": "number",
+                    "targetField": "minutes"
+                  },
+                  {
+                    "destinationType": "number",
+                    "targetField": "seconds"
+                  }
+                ],
+                "fields": {}
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "minutes_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "minutes"
+                    }
+                  },
+                  "operator": "*",
+                  "right": {
+                    "fixed": "60"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "hours_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "operator": "*",
+                  "right": {
+                    "fixed": "3600"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "m+s",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "seconds"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "minutes_seconds"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "total_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "m+s"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "hours_seconds"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "include": [
+                    "m+s"
+                  ],
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "Temperature",
+                    "total_seconds"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "total_seconds"
+                  }
+                ]
+              }
             }
           ],
-          "type": "timeseries"
+          "type": "trend"
         },
         {
           "datasource": {
@@ -1743,10 +2054,10 @@
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
-                "axisPlacement": "auto",
+                "axisPlacement": "left",
                 "barAlignment": 0,
                 "barWidthFactor": 0.6,
-                "drawStyle": "line",
+                "drawStyle": "points",
                 "fillOpacity": 0,
                 "gradientMode": "none",
                 "hideFrom": {
@@ -1757,7 +2068,7 @@
                 "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
-                "pointSize": 5,
+                "pointSize": 2,
                 "scaleDistribution": {
                   "type": "linear"
                 },
@@ -1794,9 +2105,36 @@
                     "value": 30
                   }
                 ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Temperature",
+                  "scope": "series"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ppm"
+                  }
+                ]
               },
-              "unit": "ppm"
-            }
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "total_seconds",
+                  "scope": "series"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 9,
@@ -1804,24 +2142,22 @@
             "x": 3,
             "y": 37
           },
+          "hideTimeOverride": false,
           "id": 11,
           "maxDataPoints": 10080,
           "options": {
-            "annotations": {
-              "clustering": -1,
-              "multiLane": false
-            },
             "legend": {
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
-            }
+            },
+            "xField": "total_seconds"
           },
           "pluginVersion": "13.0.1",
           "targets": [
@@ -1879,25 +2215,217 @@
               }
             }
           ],
-          "timeFrom": "7d",
+          "timeFrom": "1d",
           "title": "CO2",
           "transformations": [
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "time",
+                    "CO2"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "minutes",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "right": {
+                    "fixed": "0"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "right": {
+                    "fixed": "0"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
             {
               "id": "convertFieldType",
               "options": {
                 "conversions": [
                   {
-                    "dateFormat": "hh:mm:ss",
-                    "destinationType": "time",
-                    "targetField": "time"
+                    "destinationType": "string",
+                    "targetField": "minutes"
                   },
                   {
-                    "dateFormat": "YYYY-MM-DD",
-                    "destinationType": "time",
-                    "targetField": "date"
+                    "destinationType": "string",
+                    "targetField": "seconds"
                   }
                 ],
                 "fields": {}
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "time",
+                "substringEnd": 2
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "minutes",
+                "substringEnd": 5,
+                "substringStart": 3
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "seconds",
+                "substringEnd": 8,
+                "substringStart": 6
+              }
+            },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "destinationType": "number",
+                    "targetField": "time"
+                  },
+                  {
+                    "destinationType": "number",
+                    "targetField": "minutes"
+                  },
+                  {
+                    "destinationType": "number",
+                    "targetField": "seconds"
+                  }
+                ],
+                "fields": {}
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "minutes_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "minutes"
+                    }
+                  },
+                  "operator": "*",
+                  "right": {
+                    "fixed": "60"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "hours_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "operator": "*",
+                  "right": {
+                    "fixed": "3600"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "m+s",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "seconds"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "minutes_seconds"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "total_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "m+s"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "hours_seconds"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "include": [
+                    "m+s"
+                  ],
+                  "reducer": "sum"
+                }
               }
             },
             {
@@ -1905,14 +2433,25 @@
               "options": {
                 "include": {
                   "names": [
-                    "CO2",
-                    "time"
+                    "total_seconds",
+                    "CO2"
                   ]
                 }
               }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "total_seconds"
+                  }
+                ]
+              }
             }
           ],
-          "type": "timeseries"
+          "type": "trend"
         },
         {
           "datasource": {
@@ -1929,10 +2468,10 @@
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
-                "axisPlacement": "auto",
+                "axisPlacement": "left",
                 "barAlignment": 0,
                 "barWidthFactor": 0.6,
-                "drawStyle": "line",
+                "drawStyle": "points",
                 "fillOpacity": 0,
                 "gradientMode": "none",
                 "hideFrom": {
@@ -1943,7 +2482,7 @@
                 "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
-                "pointSize": 5,
+                "pointSize": 2,
                 "scaleDistribution": {
                   "type": "linear"
                 },
@@ -1980,9 +2519,36 @@
                     "value": 30
                   }
                 ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Temperature",
+                  "scope": "series"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percent"
+                  }
+                ]
               },
-              "unit": "percent"
-            }
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "total_seconds",
+                  "scope": "series"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 9,
@@ -1990,24 +2556,22 @@
             "x": 6,
             "y": 37
           },
+          "hideTimeOverride": false,
           "id": 12,
           "maxDataPoints": 10080,
           "options": {
-            "annotations": {
-              "clustering": -1,
-              "multiLane": false
-            },
             "legend": {
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
-            }
+            },
+            "xField": "total_seconds"
           },
           "pluginVersion": "13.0.1",
           "targets": [
@@ -2065,25 +2629,217 @@
               }
             }
           ],
-          "timeFrom": "7d",
+          "timeFrom": "1d",
           "title": "Humidity",
           "transformations": [
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "time",
+                    "Humidity"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "minutes",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "right": {
+                    "fixed": "0"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "right": {
+                    "fixed": "0"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
             {
               "id": "convertFieldType",
               "options": {
                 "conversions": [
                   {
-                    "dateFormat": "hh:mm:ss",
-                    "destinationType": "time",
-                    "targetField": "time"
+                    "destinationType": "string",
+                    "targetField": "minutes"
                   },
                   {
-                    "dateFormat": "YYYY-MM-DD",
-                    "destinationType": "time",
-                    "targetField": "date"
+                    "destinationType": "string",
+                    "targetField": "seconds"
                   }
                 ],
                 "fields": {}
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "time",
+                "substringEnd": 2
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "minutes",
+                "substringEnd": 5,
+                "substringStart": 3
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "seconds",
+                "substringEnd": 8,
+                "substringStart": 6
+              }
+            },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "destinationType": "number",
+                    "targetField": "time"
+                  },
+                  {
+                    "destinationType": "number",
+                    "targetField": "minutes"
+                  },
+                  {
+                    "destinationType": "number",
+                    "targetField": "seconds"
+                  }
+                ],
+                "fields": {}
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "minutes_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "minutes"
+                    }
+                  },
+                  "operator": "*",
+                  "right": {
+                    "fixed": "60"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "hours_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "operator": "*",
+                  "right": {
+                    "fixed": "3600"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "m+s",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "seconds"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "minutes_seconds"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "total_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "m+s"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "hours_seconds"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "include": [
+                    "m+s"
+                  ],
+                  "reducer": "sum"
+                }
               }
             },
             {
@@ -2091,14 +2847,25 @@
               "options": {
                 "include": {
                   "names": [
-                    "Humidity",
-                    "time"
+                    "total_seconds",
+                    "Humidity"
                   ]
                 }
               }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "total_seconds"
+                  }
+                ]
+              }
             }
           ],
-          "type": "timeseries"
+          "type": "trend"
         },
         {
           "datasource": {
@@ -2115,10 +2882,10 @@
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
-                "axisPlacement": "auto",
+                "axisPlacement": "left",
                 "barAlignment": 0,
                 "barWidthFactor": 0.6,
-                "drawStyle": "line",
+                "drawStyle": "points",
                 "fillOpacity": 0,
                 "gradientMode": "none",
                 "hideFrom": {
@@ -2129,7 +2896,7 @@
                 "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
-                "pointSize": 5,
+                "pointSize": 2,
                 "scaleDistribution": {
                   "type": "linear"
                 },
@@ -2166,9 +2933,36 @@
                     "value": 30
                   }
                 ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Temperature",
+                  "scope": "series"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "pressurehpa"
+                  }
+                ]
               },
-              "unit": "pressurehpa"
-            }
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "total_seconds",
+                  "scope": "series"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "s"
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 9,
@@ -2176,24 +2970,22 @@
             "x": 9,
             "y": 37
           },
+          "hideTimeOverride": false,
           "id": 13,
           "maxDataPoints": 10080,
           "options": {
-            "annotations": {
-              "clustering": -1,
-              "multiLane": false
-            },
             "legend": {
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "hideZeros": false,
               "mode": "single",
               "sort": "none"
-            }
+            },
+            "xField": "total_seconds"
           },
           "pluginVersion": "13.0.1",
           "targets": [
@@ -2251,25 +3043,217 @@
               }
             }
           ],
-          "timeFrom": "7d",
-          "title": "Presure",
+          "timeFrom": "1d",
+          "title": "Pressure",
           "transformations": [
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "time",
+                    "Pressure"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "minutes",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "right": {
+                    "fixed": "0"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "right": {
+                    "fixed": "0"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
             {
               "id": "convertFieldType",
               "options": {
                 "conversions": [
                   {
-                    "dateFormat": "hh:mm:ss",
-                    "destinationType": "time",
-                    "targetField": "time"
+                    "destinationType": "string",
+                    "targetField": "minutes"
                   },
                   {
-                    "dateFormat": "YYYY-MM-DD",
-                    "destinationType": "time",
-                    "targetField": "date"
+                    "destinationType": "string",
+                    "targetField": "seconds"
                   }
                 ],
                 "fields": {}
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "time",
+                "substringEnd": 2
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "minutes",
+                "substringEnd": 5,
+                "substringStart": 3
+              }
+            },
+            {
+              "id": "formatString",
+              "options": {
+                "outputFormat": "Substring",
+                "stringField": "seconds",
+                "substringEnd": 8,
+                "substringStart": 6
+              }
+            },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "destinationType": "number",
+                    "targetField": "time"
+                  },
+                  {
+                    "destinationType": "number",
+                    "targetField": "minutes"
+                  },
+                  {
+                    "destinationType": "number",
+                    "targetField": "seconds"
+                  }
+                ],
+                "fields": {}
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "minutes_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "minutes"
+                    }
+                  },
+                  "operator": "*",
+                  "right": {
+                    "fixed": "60"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "hours_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "time"
+                    }
+                  },
+                  "operator": "*",
+                  "right": {
+                    "fixed": "3600"
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "m+s",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "seconds"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "minutes_seconds"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "total_seconds",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "m+s"
+                    }
+                  },
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "hours_seconds"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "reduce": {
+                  "include": [
+                    "m+s"
+                  ],
+                  "reducer": "sum"
+                }
               }
             },
             {
@@ -2277,14 +3261,25 @@
               "options": {
                 "include": {
                   "names": [
-                    "Pressure",
-                    "time"
+                    "total_seconds",
+                    "Pressure"
                   ]
                 }
               }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "total_seconds"
+                  }
+                ]
+              }
             }
           ],
-          "type": "timeseries"
+          "type": "trend"
         }
       ],
       "title": "Last week",
@@ -2319,6 +3314,6 @@
   "timezone": "browser",
   "title": "weather station",
   "uid": "adhvldr",
-  "version": 27,
+  "version": 34,
   "weekStart": ""
 }
