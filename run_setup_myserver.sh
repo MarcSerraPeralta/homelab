@@ -198,3 +198,27 @@ sudo systemctl restart caddy
 sudo mkdir /var/www/homepage
 mv /tmp/config_files/config_files/homepage/ /var/www/homepage/
 sudo systemctl restart caddy
+
+# install and set up [matrix] Synapse
+sudo mkdir $HOME/config_files/synapse
+mv /tmp/config_files/config_files/synapse/ $HOME/config_files/synapse/
+sudo mkdir /srv/synapse
+sudo chown 991:991 /srv/synapse
+docker run -it --rm \
+    --mount type=bind,src=/srv/synapse,dst=/data \
+    -e SYNAPSE_SERVER_NAME=servidoret.com \
+    -e SYNAPSE_REPORT_STATS=yes \
+    matrixdotorg/synapse:latest generate
+mv $HOME/config_files/synapse/homeserver.yaml /srv/synapse/
+cd ~/config_files/synapse
+docker compose up -d
+# get IP for caddy from: docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' synapse
+# check that it works: curl https://matrix.servidoret.com/_matrix/client/versions
+# create an admin user
+docker exec -it synapse register_new_matrix_user \
+  -u admin \
+  -p changeme \
+  -a \
+  -k "..." \
+  http://localhost:8008
+cd -

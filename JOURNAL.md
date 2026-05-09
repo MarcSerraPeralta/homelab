@@ -2845,3 +2845,117 @@ Finally, I have restarted Caddy:
 ```
 sudo systemctl restart caddy
 ```
+
+
+# 2026/05/09 - Setting up [matrix] server
+
+[matrix] is a protocol for messaging. 
+I will install Synapse in my home server, which is the [matrix] implementation for the server.
+I am following the docker installation instructions from [the official docker image](https://hub.docker.com/r/matrixdotorg/synapse).
+First, I store the config file for the docker compose in `~/config_files/synapse`:
+```
+services: 
+  synapse: 
+    image: ghcr.io/element-hq/synapse:latest 
+    container_name: synapse 
+    restart: unless-stopped 
+
+    volumes: 
+      - /srv/synapse:/data 
+    
+    environment: 
+      SYNAPSE_SERVER_NAME: servidoret.com 
+      SYNAPSE_REPORT_STATS: "no" 
+      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml    
+
+    ports: []
+```
+Second, I generate the initial config to `/srv/synapse`:
+```
+sudo mkdir /srv/synapse
+sudo chown 991:991 /srv/synapse
+docker run -it --rm \
+    --mount type=bind,src=/srv/synapse,dst=/data \
+    -e SYNAPSE_SERVER_NAME=servidoret.com \
+    -e SYNAPSE_REPORT_STATS=yes \
+    matrixdotorg/synapse:latest generate
+```
+Then, I edit the `/srv/synapse/homeserver.yaml`:
+```
+server_name: "servidoret.com"
+public_baseurl: "https://matrix.servidoret.com/"
+pid_file: /data/homeserver.pid
+listeners:
+  - port: 8008
+    resources:
+    - compress: false
+      names: [client]
+    tls: false
+    type: http
+    x_forwarded: true
+database:
+  name: sqlite3
+  args:
+    database: /data/homeserver.db
+log_config: "/data/servidoret.com.log.config"
+media_store_path: /data/media_store
+registration_shared_secret: "..."
+report_stats: true
+macaroon_secret_key: "..."
+form_secret: "..."
+signing_key_path: "/data/servidoret.com.signing.key"
+federation_enabled: false
+```
+Finally, I run the docker compose with the prepared configuration file:
+```
+cd ~/config_files/synapse
+docker compose up -d
+```
+Then, I need to set up the Caddy reverse proxy.
+First, I need the IP of the docker image:
+```
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' synapse
+```
+which in my case is `172.19.0.2`.
+Then, I add to the Caddyfile the following lines:
+```
+matrix.servidoret.com {
+        @not_tailscale {
+                not remote_ip 100.64.0.0/10
+        }
+        respond @not_tailscale 403
+
+        tls {
+                dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+        }
+
+        reverse_proxy 172.19.0.2:8008 {
+                header_up Host {host}
+                header_up X-Forwarded-Proto https
+                header_up X-Forwarded-Port 443
+        }
+}
+```
+I test that the Synapse is correctly working by running:
+```
+curl https://matrix.servidoret.com/_matrix/client/versions
+```
+and getting a JSON response.
+Then, I go to `matrix.servidoret.com` in my browser, which tells me that
+I need a [matrix] client.
+
+First, I create a new user with:
+```
+docker exec -it synapse register_new_matrix_user \
+  -u marc \
+  -p changeme \
+  -a \
+  -k "..." \
+  http://localhost:8008
+```
+with `-a` making the user an admin user, `-k` the shared secred in `homeserver.yaml`,
+and `-p` the password, which can be changed later.
+
+I have installed Element as the client in my phone.
+I can log in, change my password, and send messages to myself.
+
