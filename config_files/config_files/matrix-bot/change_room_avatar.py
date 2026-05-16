@@ -10,7 +10,7 @@ CREDS_FILE = STORE_DIR / "credentials.json"
 
 # Configurations
 ROOM_ID = "!BniPKwqTilbnXsRoyO:servidoret.com" # Put your E2EE room ID here
-IMAGE_PATH = "./bot_avatar.jpg"                  # Path to your local image file
+IMAGE_PATH = "./montly-expenses_icon.jpg"                  # Path to your local image file
 
 async def main():
     with open(CREDS_FILE, "r") as f:
