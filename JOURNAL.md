@@ -2941,6 +2941,25 @@ I test that the Synapse is correctly working by running:
 curl https://matrix.servidoret.com/_matrix/client/versions
 ```
 and getting a JSON response.
+It didn't work, so I checked the logs using:
+```
+docker logs synapse
+```
+and then saw that it didn't have permissions to write a file.
+I changed the line in `/srv/synapse/servidoret.com.log.config` from:
+```
+filename: /homeserver.log
+```
+to
+```
+filename: /data/homeserver.log
+```
+Doing a 
+```
+docker restart synapse
+```
+makes it work.
+
 Then, I go to `matrix.servidoret.com` in my browser, which tells me that
 I need a [matrix] client.
 
@@ -2958,4 +2977,96 @@ and `-p` the password, which can be changed later.
 
 I have installed Element as the client in my phone.
 I can log in, change my password, and send messages to myself.
+
+If I ever forget my password, I can also use my access token, which can
+be found in the Element Android app in
+```
+Settings > Advanced settings > (enable Developer mode) > Dev Tools > Access Token
+```
+
+I have also enabled notifications via email by adding the following lines to
+the `homeserver.yaml` file:
+```
+password_config:
+  enabled: true
+  localdb_enabled: true
+email:
+  smtp_host: smtp.gmail.com
+  smtp_port: 587
+  smtp_user: bot.servidoret@gmail.com
+  smtp_pass: "apppassword"
+
+  require_transport_security: true
+  enable_tls: true
+
+  notif_from: "Matrix <bot.servidoret@gmail.com>"
+  app_name: Matrix
+```
+I have now linked an email to my user (using the android app).
+I have logged in to `https://app.element.io`, which is the website based Element app,
+and selected "Forgot password". 
+I got an email to update my password, so it works.
+
+
+# 2026/05/14 - Setting up bot in [matrix] server (Part 1)
+
+I create a new user corresponding to the bot:
+```
+docker exec -it synapse register_new_matrix_user \
+  -u bot \
+  -p StrongPassword \
+  -k "..." \
+  http://localhost:8008
+```
+with `-k` the shared secred in `homeserver.yaml`.
+
+I have tested that I can log in using the browser: https://app.element.io.
+Then, I have send an inviation to my other user `marc` and now I can have a
+chat between `marc` and `bot`.
+
+Because I am using Element as my android client app for [matrix],
+the encryption is enabled by default (E2EE = end-to-end encryption). 
+This means that the devices need to support decryption/encryption, including my bot,
+in order to decript the messages in the room.
+The bot needs to store a persistent crypto store to save the keys.
+Moreover, now the identity trust in [matrix] is done via cross-signing
+(before it could be done with a fingerprint).
+I am not sure about how this works, but it is important for chosing the Python package
+to use when coding up the bot.
+For example, I started trying `matrix-nio` because it supports E2E, 
+but I later realized that it (currently) does not support cross-signing
+which makes it super difficult (or maybe impossible) to then trust the bot's device.
+I am able to set the E2E in a python script and then I am able to 
+read and send messages in an encrypted room with myserlf. 
+However, the messages show an icon saying that the message comes from an
+unverified device and I have to set the room to allow unverified devices
+to send and receive messages in Element.
+For this reason, I tried `mautrix` as it supports both E2E and [cross-signing](https://github.com/mautrix/python/commit/e496c2f5a2bd74458758c1f214101364c9483f64).
+However, even though it supports cross-signing,
+it does not support (or it is very difficult to set up) the protocol to verify it.
+In the end, I have switched back to using `matrix-nio`.
+I have seen that there is an example in the GitHub repo that seems to
+support emoji verification (see [this file](https://github.com/matrix-nio/matrix-nio/blob/eeace59baa634ab0ee747ba40a7a96a686a9e536/examples/verify_with_emoji.py).
+However, it did not work in my case. Maybe I will try again later.
+
+I have installed the `libolm` library required for encryption:
+```
+sudo apt install libolm-dev
+```
+
+I do not know how the [matrix] protocol, nor Synapse, nor Element work.
+There are not a lot of examples on the Internet of setting up a bot.
+Therefore, I have used Google Gemini to help me code some small scripts
+showcasting a single functionality that is available for the bot.
+
+As a general overview, these are the steps:
+1. Create a user for the bot
+2. Run the `prepare_bot.py` script, which generates and stores the cryptographic keys
+3. Open Element and log in as the bot to invite my own user to become a "friend"
+4. Run all the other small scripts to test that they work correctly
+
+I have not done it now, but I will probably use the `python-dotenv` package,
+which can easily read the values from a `.env` file.
+
+The other thing that is missing is putting all the scripts together as a single bot.
 
