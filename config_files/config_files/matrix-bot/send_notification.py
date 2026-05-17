@@ -11,6 +11,7 @@ HOMESERVER = "https://matrix.servidoret.com"
 USER_ID = "@bot-expenses:servidoret.com"
 ROOM_ID = "!GgmBycypOfQkTMrLgf:servidoret.com"  # The room ID from your logs
 
+
 async def main():
     if not CREDS_FILE.exists():
         print("❌ Stored credentials not found. Run your preparation script first.")
@@ -21,7 +22,7 @@ async def main():
 
     # Enable E2EE inside the client configuration
     config = AsyncClientConfig(encryption_enabled=True)
-    
+
     client = AsyncClient(
         HOMESERVER,
         USER_ID,
@@ -29,7 +30,7 @@ async def main():
         store_path=str(STORE_DIR),
         config=config,
     )
-    
+
     client.restore_login(
         user_id=USER_ID,
         device_id=creds["device_id"],
@@ -47,18 +48,21 @@ async def main():
         message_type="m.room.message",
         content={
             "msgtype": "m.text",
-            "body": "🔒 Hello! This is an end-to-end encrypted notification from your home server bot."
+            "body": "🔒 Hello! This is an end-to-end encrypted notification from your home server bot.",
         },
-        ignore_unverified_devices=True  # <-- CRITICAL: Bypasses emoji verification check
+        ignore_unverified_devices=True,  # <-- CRITICAL: Bypasses emoji verification check
     )
 
     # 3. Verify it went through smoothly
     if isinstance(response, RoomSendResponse):
         print(f"✅ Success! Message sent. Event ID: {response.event_id}")
     elif isinstance(response, RoomSendError):
-        print(f"❌ Failed to send message: {response.message} (Error code: {response.status_code})")
+        print(
+            f"❌ Failed to send message: {response.message} (Error code: {response.status_code})"
+        )
 
     await client.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

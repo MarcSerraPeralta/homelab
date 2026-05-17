@@ -9,9 +9,10 @@ CREDS_FILE = STORE_DIR / "credentials.json"
 HOMESERVER = "https://matrix.servidoret.com"
 USER_ID = "@bot-expenses:servidoret.com"
 
+
 async def message_callback(room, event: RoomMessageText):
     """
-    This callback triggers automatically every time a new text message 
+    This callback triggers automatically every time a new text message
     is received and successfully decrypted by matrix-nio.
     """
     # Skip printing the bot's own messages to keep the terminal clean
@@ -20,11 +21,12 @@ async def message_callback(room, event: RoomMessageText):
 
     # Fallback to room_id if the room doesn't have a human-readable name yet
     room_name = room.display_name or room.room_id
-    
+
     print(f"📩 New Message in [{room_name}]")
     print(f"   👤 Sender: {event.sender}")
     print(f"   💬 Text:   {event.body}")
     print("-" * 40)
+
 
 async def main():
     if not CREDS_FILE.exists():
@@ -36,7 +38,7 @@ async def main():
 
     # Enable encryption in the config so the background engine handles decryption
     config = AsyncClientConfig(encryption_enabled=True)
-    
+
     client = AsyncClient(
         HOMESERVER,
         USER_ID,
@@ -44,7 +46,7 @@ async def main():
         store_path=str(STORE_DIR),
         config=config,
     )
-    
+
     client.restore_login(
         user_id=USER_ID,
         device_id=creds["device_id"],
@@ -66,6 +68,7 @@ async def main():
         print("\nStopping listener...")
     finally:
         await client.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -9,8 +9,9 @@ STORE_DIR = pathlib.Path("./store_gemini_bot-expenses")
 CREDS_FILE = STORE_DIR / "credentials.json"
 
 # Configurations
-ROOM_ID = "!BniPKwqTilbnXsRoyO:servidoret.com" # Put your E2EE room ID here
-IMAGE_PATH = "./montly-expenses_icon.jpg"                  # Path to your local image file
+ROOM_ID = "!BniPKwqTilbnXsRoyO:servidoret.com"  # Put your E2EE room ID here
+IMAGE_PATH = "./montly-expenses_icon.jpg"  # Path to your local image file
+
 
 async def main():
     with open(CREDS_FILE, "r") as f:
@@ -46,7 +47,7 @@ async def main():
     file_size = local_file.stat().st_size
 
     print(f"📤 Step 1: Uploading {local_file.name} ({file_size} bytes) to Synapse...")
-    
+
     with open(local_file, "rb") as image_file:
         raw_bytes = image_file.read()
         buffer_stream = io.BytesIO(raw_bytes)
@@ -55,7 +56,7 @@ async def main():
             buffer_stream,
             content_type=mime_type,
             filename=local_file.name,
-            filesize=file_size  
+            filesize=file_size,
         )
 
     # --- FIX: Direct parsing of the nio response object or tuple ---
@@ -83,19 +84,14 @@ async def main():
     print(f"✅ Upload successful! Media URI extracted: {mxc_uri}")
 
     print("🖼️ Step 2: Assigning the media URI to the room profile avatar...")
-    
-    avatar_content = {
-        "url": mxc_uri,
-        "info": {
-            "mimetype": mime_type
-        }
-    }
+
+    avatar_content = {"url": mxc_uri, "info": {"mimetype": mime_type}}
 
     state_response = await client.room_put_state(
         room_id=ROOM_ID,
         event_type="m.room.avatar",
         content=avatar_content,
-        state_key="" 
+        state_key="",
     )
 
     if hasattr(state_response, "event_id"):
@@ -105,6 +101,7 @@ async def main():
         print(f"❌ Failed to set room avatar: {state_response.message}")
 
     await client.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

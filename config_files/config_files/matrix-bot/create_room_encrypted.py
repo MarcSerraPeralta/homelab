@@ -2,18 +2,19 @@ import json
 import pathlib
 import asyncio
 from nio import (
-    AsyncClient, 
-    AsyncClientConfig, 
-    RoomCreateResponse, 
+    AsyncClient,
+    AsyncClientConfig,
+    RoomCreateResponse,
     RoomPreset,
-    EnableEncryptionBuilder  # <-- Native encryption module helper
+    EnableEncryptionBuilder,  # <-- Native encryption module helper
 )
 
 STORE_DIR = pathlib.Path("./store_gemini_bot-expenses")
 CREDS_FILE = STORE_DIR / "credentials.json"
 
-MY_USER_ID = "@marc:servidoret.com" 
+MY_USER_ID = "@marc:servidoret.com"
 DESIRED_ALIAS = "my-new-room"
+
 
 async def main():
     with open(CREDS_FILE, "r") as f:
@@ -45,20 +46,14 @@ async def main():
     power_level_content = {
         "users": {
             "@bot-expenses:servidoret.com": 100,  # The bot is creator/admin
-            MY_USER_ID: 100                      # Force YOU to be a full co-Admin immediately
+            MY_USER_ID: 100,  # Force YOU to be a full co-Admin immediately
         }
     }
 
     # 3. Compile the structural state changes cleanly
     initial_state_events = [
-        {
-            "type": "m.room.power_levels",
-            "content": power_level_content
-        },
-        {
-            "type": "m.room.encryption",
-            "content": encryption_event["content"]
-        }
+        {"type": "m.room.power_levels", "content": power_level_content},
+        {"type": "m.room.encryption", "content": encryption_event["content"]},
     ]
 
     # Execute the room creation sequence
@@ -80,6 +75,7 @@ async def main():
         print(f"❌ Failed to create room: {response.message}")
 
     await client.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
