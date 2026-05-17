@@ -42,11 +42,6 @@ POLL_QUESTIONS = [
     },
 ]
 
-# Trackers for running dynamic steps
-poll_answered_signal = asyncio.Event()
-current_active_poll_id = None
-user_selections = {}
-
 
 async def get_authenticated_client() -> AsyncClient:
     with open(CREDS_FILE, "r") as f:
@@ -137,38 +132,54 @@ async def end_poll(
     return
 
 
-async def custom_event_callback(room: MatrixRoom, event: Event):
-    """Listens globally for incoming decrypted timeline events."""
-    global current_active_poll_id
-
+async def custom_event_callback(
+    room: MatrixRoom,
+    event: Event,
+    bot_context: dict,
+    poll_answered_signal: asyncio.Event,
+):
+    """Listens globally for incoming decrypted timeline events using passed references."""
     if room.room_id != TARGET_ROOM_ID or event.sender != MY_USER_ID:
         return
 
-    # Check if the incoming event is a response to our open poll
+    # Check if the incoming event is a response to our currently active open poll
     event_content = event.source.get("content", {})
     relation = event_content.get("m.relates_to", {})
 
+    active_poll_id = bot_context["current_active_poll_id"]
+
     if (
         relation.get("rel_type") == "m.reference"
-        and relation.get("event_id") == current_active_poll_id
+        and relation.get("event_id") == active_poll_id
     ):
         poll_resp = event_content.get("org.matrix.msc3381.poll.response")
         if poll_resp:
             selections = poll_resp.get("answers", [])
             if selections:
                 chosen_option_id = selections[0]
-                user_selections[current_active_poll_id] = chosen_option_id
+                # Mutate the user selections registry stored in our main scope object
+                bot_context["user_selections"][active_poll_id] = chosen_option_id
 
                 # Unlock the execution loop for this question
                 poll_answered_signal.set()
 
 
 async def main():
-    global current_active_poll_id
     client = await get_authenticated_client()
 
-    # Track structural events natively
-    client.add_event_callback(custom_event_callback, Event)
+    # Define all changing state variables inside a mutable tracking dictionary scope
+    bot_context = {"current_active_poll_id": None, "user_selections": {}}
+
+    # Instance your signaling system locally inside main
+    poll_answered_signal = asyncio.Event()
+
+    # Pass the context and signal references straight through the lambda parameters
+    client.add_event_callback(
+        lambda room, event: custom_event_callback(
+            room, event, bot_context, poll_answered_signal
+        ),
+        Event,
+    )
     client.add_event_callback(lambda r, e: None, MegolmEvent)
 
     print(f"📡 Survey bot online. Connected to room: {TARGET_ROOM_ID}")
@@ -178,9 +189,11 @@ async def main():
         for q_block in POLL_QUESTIONS:
             print(f"\n🚀 Firing Poll Question: {q_block['question']}")
 
-            # 2.1 Send the poll and track its structural event ID
+            # 2.1 Send the poll and track its structural event ID inside our dictionary
             poll_answered_signal.clear()
-            current_active_poll_id = await send_poll(client, TARGET_ROOM_ID, q_block)
+
+            poll_id = await send_poll(client, TARGET_ROOM_ID, q_block)
+            bot_context["current_active_poll_id"] = poll_id
 
             # 2.2 Wait continuously for you to make a choice
             print("⏳ Waiting for user input via Element client...")
@@ -189,7 +202,7 @@ async def main():
                 await asyncio.sleep(0.5)
 
             # Extract human readable translation
-            selected_id = user_selections[current_active_poll_id]
+            selected_id = bot_context["user_selections"][poll_id]
             readable_answer = next(
                 o["text"] for o in q_block["options"] if o["id"] == selected_id
             )
@@ -197,9 +210,7 @@ async def main():
 
             # 2.3 Close the poll on the active timeline
             print("🔒 Answer captured! Finalizing timeline footprint...")
-            await end_poll(
-                client, TARGET_ROOM_ID, current_active_poll_id, q_block["question"]
-            )
+            await end_poll(client, TARGET_ROOM_ID, poll_id, q_block["question"])
 
             # Run a quick sync pulse to flush event streams
             await client.sync(timeout=1000)
