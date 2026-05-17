@@ -1,2 +1,2 @@
-matrix-nio[e2e]
-python-dotenv
+matrix-nio[e2e]==0.25.2
+python-dotenv==1.2.2
