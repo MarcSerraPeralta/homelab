@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import json
 import pathlib
 import asyncio
@@ -11,9 +12,9 @@ HOMESERVER: str = os.environ.get("HOMESERVER")
 BOT_USER_ID: str = os.environ.get("BOT_USER_ID")
 BOT_PASSWORD: str = os.environ.get("BOT_PASSWORD")
 STORE_DIR = pathlib.Path(os.environ.get("STORE_DIR"))
+CREDS_FILE: Path = STORE_DIR / os.environ.get("CREDENTIALS_NAME")
 
 STORE_DIR.mkdir(exist_ok=True)
-CREDS_FILE = STORE_DIR / "credentials.json"
 
 
 async def main():

@@ -1,1 +1,4 @@
 *.env
+expense_helpers.py
+store_*
+__pycache__/

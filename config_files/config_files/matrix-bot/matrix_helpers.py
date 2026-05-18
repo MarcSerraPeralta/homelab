@@ -17,7 +17,6 @@ from nio import (
     RoomLeaveError,
     RoomSendError,
     Event,
-    MegolmEvent,
     MatrixRoom,
     DownloadError,
 )
@@ -283,7 +282,7 @@ async def end_poll(client: AsyncClient, room_id: str, poll_event_id: str) -> Non
     end_content = {
         "m.relates_to": {"rel_type": "m.reference", "event_id": poll_event_id},
         "org.matrix.msc3381.poll.end": {},
-        "body": f"The poll is now closed.",
+        "body": "The poll is now closed.",
         "msgtype": "m.notice",
     }
 
@@ -325,4 +324,28 @@ async def poll_event_callback(
 
     bot_context["user_selection"] = selections[0]
     poll_answered_signal.set()
+    return
+
+
+async def wait_for_message(client: AsyncClient, room_id: str) -> None:
+    message_received_signal = asyncio.Event()
+
+    def handle_incoming_message(room, event: Event) -> None:
+        if room.room_id != room_id:
+            return
+        if event.sender == client.user_id:
+            return
+        # target cleartext room timeline messages specifically.
+        if event.source.get("type") == "m.room.message":
+            message_received_signal.set()
+
+    # Register the cleartext Event listener
+    client.add_event_callback(handle_incoming_message, Event)
+
+    while not message_received_signal.is_set():
+        _ = await client.sync(timeout=5000, full_state=False)
+        await asyncio.sleep(0.5)
+
+    _ = client.response_callbacks.pop(-1)
+
     return

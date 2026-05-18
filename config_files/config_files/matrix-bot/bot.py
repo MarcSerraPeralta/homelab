@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import yaml
 import os
 from pathlib import Path
@@ -17,7 +17,14 @@ from matrix_helpers import (
     poll_event_callback,
     send_poll,
     end_poll,
+    wait_for_message,
     MY_USER_ID,
+)
+from expense_helpers import (
+    process_expenses,
+    add_missing_categories,
+    plot_summary,
+    relabel_bank_statement_files,
 )
 
 _ = load_dotenv()
@@ -26,14 +33,15 @@ PLOTS_DIR: Path = Path(os.environ.get("PLOTS_DIR"))
 SUMMARY_ROOM_ID: str = os.environ.get("SUMMARY_ROOM_ID")
 CATEGORIES_FILE: str = os.environ.get("CATEGORIES_FILE")
 
-TODAY = datetime.now()
+DATE = datetime.now() - timedelta(days=5)
+DATE_STR = DATE.strftime("%Y-%m")
 
 with open(CATEGORIES_FILE, "r") as file:
     CATEGORIES: list[str] = list(yaml.safe_load(file))
 
 
 async def get_bank_statements(client: AsyncClient) -> str:
-    room_id = await create_encrypted_room(client, f"Expenses {TODAY.strftime('%b %Y')}")
+    room_id = await create_encrypted_room(client, f"Expenses {DATE.strftime('%b %Y')}")
     await set_room_avatar(client, room_id)
 
     # sync local room cache with server
@@ -51,6 +59,8 @@ async def get_bank_statements(client: AsyncClient) -> str:
 
     while bot_state["downloads"] < 2:
         _ = await client.sync(timeout=30_000, full_state=True)
+
+    _ = client.response_callbacks.pop(-1)
 
     return room_id
 
@@ -95,16 +105,30 @@ async def request_missing_categories(
         await end_poll(client, room_id, poll_id)
         _ = await client.sync(timeout=1000)
 
+    _ = client.response_callbacks.pop(-1)
+
     return answers
 
 
 async def send_summary(client: AsyncClient, room_id: str) -> None:
     await delete_room(client, room_id)
 
-    image_path = PLOTS_DIR / f"{TODAY.strftime('%Y-%m')}_summary.jpg"
+    image_path = PLOTS_DIR / f"{DATE_STR}_summary.jpg"
     await send_image(client, image_path, SUMMARY_ROOM_ID)
 
     await client.close()
+    return
+
+
+async def acknowledge_warnings(
+    client: AsyncClient, warnings: list[str], room_id: str
+) -> None:
+    for warning in warnings:
+        await send_message(client, warning, room_id)
+    await send_message(client, "Send any message to continue", room_id)
+
+    await wait_for_message(client, room_id)
+
     return
 
 
@@ -115,20 +139,17 @@ if __name__ == "__main__":
     client = loop.run_until_complete(get_authenticated_client())
 
     room_id = loop.run_until_complete(get_bank_statements(client))
+    relabel_bank_statement_files(DATE_STR)
 
-    # process bank statements
-    unclassified_elements = [
-        "10€ 2026/... BIZUM",
-        "some other statement",
-        "another statement",
-    ]
+    unclassified_elements, warnings = process_expenses(DATE_STR)
+    loop.run_until_complete(acknowledge_warnings(client, warnings, room_id))
 
     answers = loop.run_until_complete(
         request_missing_categories(client, unclassified_elements, room_id)
     )
-    print(answers)
+    add_missing_categories(DATE_STR, answers)
 
-    # add classification to processed bank statements
+    plot_summary(DATE_STR)
 
     loop.run_until_complete(send_summary(client, room_id))
 
