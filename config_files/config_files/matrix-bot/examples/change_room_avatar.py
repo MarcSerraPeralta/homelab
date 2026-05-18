@@ -3,7 +3,7 @@ import json
 import pathlib
 import asyncio
 import mimetypes
-from nio import AsyncClient, AsyncClientConfig, UploadResponse
+from nio import AsyncClient, AsyncClientConfig, UploadResponse, UploadError
 
 STORE_DIR = pathlib.Path("./store_gemini_bot-expenses")
 CREDS_FILE = STORE_DIR / "credentials.json"

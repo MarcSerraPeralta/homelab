@@ -69,7 +69,7 @@ async def main():
 
     if isinstance(response, RoomCreateResponse):
         print(f"\n🎉 SUCCESS! Room created with ID: {response.room_id}")
-        print(f"👉 Open Element, accept the invite, and check your Room Settings.")
+        print("👉 Open Element, accept the invite, and check your Room Settings.")
         print("You will see that you are an Administrator and E2EE is cleanly active!")
     else:
         print(f"❌ Failed to create room: {response.message}")
