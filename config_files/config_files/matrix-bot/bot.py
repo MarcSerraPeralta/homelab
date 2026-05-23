@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 import yaml
 import os
 from pathlib import Path
@@ -16,15 +15,17 @@ from matrix_helpers import (
     delete_room,
     poll_event_callback,
     send_poll,
-    end_poll,
+    wait_for_room_in_cache,
     wait_for_message,
     MY_USER_ID,
+    DATE_STR,
 )
 from expense_helpers import (
     process_expenses,
     add_missing_categories,
     plot_summary,
     relabel_bank_statement_files,
+    LONG_ALPHABETIC,
 )
 
 _ = load_dotenv()
@@ -33,19 +34,20 @@ PLOTS_DIR: Path = Path(os.environ.get("PLOTS_DIR"))
 SUMMARY_ROOM_ID: str = os.environ.get("SUMMARY_ROOM_ID")
 CATEGORIES_FILE: str = os.environ.get("CATEGORIES_FILE")
 
-DATE = datetime.now() - timedelta(days=5)
-DATE_STR = DATE.strftime("%Y-%m")
-
 with open(CATEGORIES_FILE, "r") as file:
     CATEGORIES: list[str] = list(yaml.safe_load(file))
 
 
 async def get_bank_statements(client: AsyncClient) -> str:
-    room_id = await create_encrypted_room(client, f"Expenses {DATE.strftime('%b %Y')}")
+    # get room name
+    y, m = map(int, DATE_STR.split("-"))
+    room_name = f"Expenses {LONG_ALPHABETIC[m]} {y}"
+
+    room_id = await create_encrypted_room(client, room_name)
     await set_room_avatar(client, room_id)
 
     # sync local room cache with server
-    _ = await client.sync(timeout=3000)
+    await wait_for_room_in_cache(client, room_id, retries=10)
     await send_message(client, "Upload bank statements to continue", room_id)
 
     # set bot behaviour when it sees an attached file
@@ -59,8 +61,6 @@ async def get_bank_statements(client: AsyncClient) -> str:
 
     while bot_state["downloads"] < 2:
         _ = await client.sync(timeout=30_000, full_state=True)
-
-    _ = client.response_callbacks.pop(-1)
 
     return room_id
 
@@ -102,18 +102,13 @@ async def request_missing_categories(
         answer = CATEGORIES[selected_id]
         answers.append(answer)
 
-        await end_poll(client, room_id, poll_id)
-        _ = await client.sync(timeout=1000)
-
-    _ = client.response_callbacks.pop(-1)
-
     return answers
 
 
-async def send_summary(client: AsyncClient, room_id: str) -> None:
+async def send_summary(client: AsyncClient, date_str: str, room_id: str) -> None:
     await delete_room(client, room_id)
 
-    image_path = PLOTS_DIR / f"{DATE_STR}_summary.jpg"
+    image_path = PLOTS_DIR / f"{date_str}_summary.jpg"
     await send_image(client, image_path, SUMMARY_ROOM_ID)
 
     await client.close()
@@ -142,7 +137,8 @@ if __name__ == "__main__":
     relabel_bank_statement_files(DATE_STR)
 
     unclassified_elements, warnings = process_expenses(DATE_STR)
-    loop.run_until_complete(acknowledge_warnings(client, warnings, room_id))
+    if warnings:
+        loop.run_until_complete(acknowledge_warnings(client, warnings, room_id))
 
     answers = loop.run_until_complete(
         request_missing_categories(client, unclassified_elements, room_id)
@@ -150,7 +146,11 @@ if __name__ == "__main__":
     add_missing_categories(DATE_STR, answers)
 
     plot_summary(DATE_STR)
+    loop.run_until_complete(send_summary(client, DATE_STR, room_id))
 
-    loop.run_until_complete(send_summary(client, room_id))
+    if DATE_STR.endswith("12"):
+        YEAR_STR = DATE_STR.split("-")[0]
+        plot_summary(YEAR_STR)
+        loop.run_until_complete(send_summary(client, YEAR_STR, room_id))
 
     loop.run_until_complete(client.close())

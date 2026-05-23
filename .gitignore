@@ -1,4 +1,8 @@
 *.env
+downloads/
+plots/
 expense_helpers.py
+summary_helpers.py
+categories.yaml
 store_*
 __pycache__/

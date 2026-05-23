@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -33,7 +33,8 @@ BOT_USER_ID: str = os.environ.get("BOT_USER_ID")
 MY_USER_ID: str = os.environ.get("MY_USER_ID")
 ROOM_IMAGE_FILE: str = os.environ.get("ROOM_IMAGE_FILE")
 
-TODAY = datetime.now()
+DATE = datetime.now() - timedelta(days=5)
+DATE_STR = DATE.strftime("%Y-%m")
 DATA_DIR.mkdir(exist_ok=True, parents=True)
 
 
@@ -181,7 +182,7 @@ async def download_attachment_callback(
         file_info["iv"],
     )
 
-    output_path = DATA_DIR / f"{TODAY.strftime('%Y-%m')}-{bot_state['downloads']}"
+    output_path = DATA_DIR / f"{DATE_STR}-{bot_state['downloads']}.txt"
     with open(output_path, "wb") as f:
         _ = f.write(decrypted_bytes)
     bot_state["downloads"] += 1
@@ -346,6 +347,17 @@ async def wait_for_message(client: AsyncClient, room_id: str) -> None:
         _ = await client.sync(timeout=5000, full_state=False)
         await asyncio.sleep(0.5)
 
-    _ = client.response_callbacks.pop(-1)
-
     return
+
+
+async def wait_for_room_in_cache(
+    client: AsyncClient, room_id: str, retries: int = 5
+) -> None:
+    for attempt in range(retries):
+        if room_id in client.rooms:
+            return
+        _ = await client.sync(timeout=3000, full_state=True)
+        await asyncio.sleep(1)
+    raise TimeoutError(
+        f"Room {room_id} failed to materialize in client after {retries} syncs."
+    )
