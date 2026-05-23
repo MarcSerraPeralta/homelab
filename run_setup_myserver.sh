@@ -222,3 +222,31 @@ docker exec -it synapse register_new_matrix_user \
   -k "..." \
   http://localhost:8008
 cd -
+
+# set up [matrix] bot for summarizing my expenses
+cd ~/config_files/synapse
+docker exec -it synapse register_new_matrix_user \
+  -u bot \
+  -p changeme \
+  -k "..." \
+  http://localhost:8008
+cd -
+mv /tmp/config_files/config_files/matrix-bot/ $HOME/config_files/matrix-bot/
+chmod +x $HOME/config_files/matrix-bot/bot_expenses.sh
+# edit .env file inside matrix-bot/
+# prepare venv and credentials for the bot
+cd ~/config_files/matrix-bot
+python3 -m venv venv_expenses
+source ./venv_expenses/bin/activate
+pip install -r requirements.txt
+python prepare_bot.py
+deactivate
+sudo mkdir /srv_msata/expenses
+sudo chown -R $USER:$USER /srv_msata/expenses
+mkdir /srv_msata/expenses/data
+mkdir /srv_msata/expenses/plots
+# copy all existing data already to /srv_msata/expenses/data
+chmod 700 /srv_msata/expenses
+# first day of every month at 7am
+(crontab -l 2>/dev/null; echo "0 7 1 * * /home/marc/config_files/matrix-bot/bot_expenses.sh") | crontab -
+

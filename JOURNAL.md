@@ -3070,3 +3070,10 @@ which can easily read the values from a `.env` file.
 
 The other thing that is missing is putting all the scripts together as a single bot.
 
+
+# 2026/05/23 - Setting up bot in [matrix] server (Part 2)
+
+I have finished coding up the bot and now it works as expected.
+The scripts for processing my expenses are obviously not included in this repo.
+I have set a cron job that runs the bot on the first day of every month.
+
