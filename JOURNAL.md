@@ -3077,3 +3077,53 @@ I have finished coding up the bot and now it works as expected.
 The scripts for processing my expenses are obviously not included in this repo.
 I have set a cron job that runs the bot on the first day of every month.
 
+
+# 2026/05/24 - Setting up a Minecraft server
+
+I am using Fabric mods so I will install the Fabric Minecraft server.
+I am following the [official installation guide](https://fabricmc.net/use/server/).
+I have created the directory `/srv_msata/minecraft/` and transfered ownership:
+```
+sudo mkdir /srv_msata/minecraft
+sudo chown -R $USER:$USER /srv_msata/minecraft
+```
+Then, I have downloaded the server app:
+```
+curl -OJ https://meta.fabricmc.net/v2/versions/loader/26.1.2/0.19.2/1.1.1/server/jar
+```
+I have notived that I do not have Java installed.
+The required version is specified in [this official guide](https://wiki.fabricmc.net/player:tutorials:install_server).
+For my case (headless server):
+```
+sudo apt install openjdk-8-jre-headless
+```
+Then, I just need to run the following (replace 4G by the RAM to be given to the server):
+```
+java -Xmx4G -jar fabric-server-mc.26.1.2-loader.0.19.2-launcher.1.1.1.jar nogui
+```
+OK, so there is a java version missmatch because the guide is not up to date.
+I have now installed:
+```
+sudo apt install openjdk-25-jre-headless
+```
+Then it works and it tells me to agree to the EULA, which can be done by 
+modifying the `eula.txt` file.
+Finally, rerunning the java server command correctly creates the server.
+
+I can install mods by copying their files into the `mods/` directory.
+These are the ones I have installed:
+```
+Chunky-Fabric-1.5.3.jar
+DistantHorizons-3.0.3-b-26.1.2-fabric-neoforge.jar
+FallingTree-26.1.2-25.jar
+Structory_26.1_v1.3.16.jar
+Terralith_26.1_v2.6.1_Fabric.jar
+cristellib-fabric-26.1.2-3.1.4.jar
+fabric-api-0.149.1+26.1.2.jar
+ferritecore-9.0.0-fabric.jar
+lithium-fabric-0.24.2+mc26.1.2.jar
+lithostitched-1.7.7-fabric-26.1.jar
+t_and_t-fabric-neoforge-1.13.11.jar # towns and towers
+```
+and I am using Minecraft version 26.1.2.
+
