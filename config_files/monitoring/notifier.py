@@ -9,11 +9,13 @@ load_dotenv("/home/marc/monitoring/notifier.env")
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Missing email subject.", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print("Usage: notifier.py <event> <service>", file=sys.stderr)
         sys.exit(1)
 
-    subject = sys.argv[1]
+    event = sys.argv[1]
+    service = sys.argv[2]
+    subject = f"{service} [{event.upper()}]"
 
     gmail_user = os.getenv("GMAIL_USER")
     gmail_pass = os.getenv("GMAIL_APP_PASSWORD")
@@ -35,7 +37,7 @@ def main():
             smtp.starttls()
             smtp.login(gmail_user, gmail_pass)
             smtp.send_message(msg)
-        print("Notification sent correctly")
+        print(f"Notification sent correctly to {recipient} from {gmail_user}")
         sys.exit(0)
     except Exception as e:
         print(f"Failed to send email: {e}", file=sys.stderr)

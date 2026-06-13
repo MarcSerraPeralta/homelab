@@ -3159,3 +3159,148 @@ on my home directory because it can be bug prone (e.g. I start moving stuff).
 I will probably also move where the monitoring data is located and put it
 in some directory inside `/srv` or `/srv_msata`.
 
+
+# 2026/06/13 - Improve management of cron and services (Part 2)
+
+Continuing the management of cron and systemctl services,
+```
+sudo mkdir /opt/notifier
+# temporarilly change permissions
+sudo chown $USER:$USER /opt/notifier
+
+# create venv in /opt/notifier
+python3 -m venv /opt/notifier/venv
+source /opt/notifier/venv/bin/activate
+pip install --upgrade pip
+pip install python-dotenv
+
+# change permissions back to root access
+sudo chown root:root -R /opt/notifier
+# hide .env contents
+sudo chmod 600 /opt/notifier/notifier.env
+```
+Then, I test that the script works correctly
+```
+sudo /opt/notifier/venv/bin/python /opt/notifier/notifier.py "test"
+```
+which works.
+
+Now, I need create the notifier services for failure, start, and stop:
+```
+sudo vim /etc/systemd/system/notifier-failure@.service
+sudo vim /etc/systemd/system/notifier-start@.service
+sudo vim /etc/systemd/system/notifier-stop@.service
+```
+and paste the contents:
+```
+[Unit]
+Description=Send failure notification for %i
+
+[Service]
+Type=oneshot
+ExecStart=/opt/notifier/venv/bin/python /opt/notifier/notifier.py failure %i
+```
+and similarly for start and stop.
+Then, I reload the `systemctl`:
+```
+sudo systemctl daemon-reload
+```
+
+I have first modified `caddy` to test it:
+```
+sudo systemctl edit caddy.service
+```
+and add:
+```
+[Unit]
+Wants=notifier-start@%n
+OnSuccess=notifier-stop@%n
+OnFailure=notifier-failure@%n
+```
+Then, I reload the `systemctl`:
+```
+sudo systemctl daemon-reload
+```
+
+To test it, I have restarted the `caddy` service:
+```
+sudo systemctl restart caddy.service
+```
+
+For "always-on" services, I should populate all three `Wants`, `OnSuccess`, and `OnFailure`.
+However, for "repeating" services, I should only populate `OnFailure`, because I do
+not want to receive a message any time the service (correctly) starts or stops,
+i.e. I just want to know if there is a failure.
+
+I have added the `[Unit] ...` to all the following "always-on" services:
+```
+caddy.service
+grafana-server.service
+jellyfin.service
+tailscaled.service
+pihole-FTL.service
+monitoring-data-http.service
+unbound.service
+weather-station-server.service
+docker.service
+```
+For my custom "always-on" services, I have also added:
+```
+[Service]
+Restart=always
+```
+
+Now, I will set up the "repeating" services.
+I will start with the `bot_expenses.sh` cron job.
+
+First, I will move everything to `/opt` in the same way I have done for the 
+notifier script.
+
+I create the service:
+```
+sudo vim /etc/systemd/system/bot-expenses.service
+```
+with contents:
+```
+[Unit]
+Description=Bot for monthly expenses
+OnFailure=notifier-failure@%n
+
+[Service]
+Type=oneshot
+ExecStart=/opt/bot-expenses/venv/bin/python /opt/bot-expenses/bot-expenses.py
+```
+Then, I create the associated timer:
+```
+sudo vim /etc/systemd/system/bot-expenses.timer
+```
+with contents:
+```
+[Unit]
+Description=Runs monthly on the 1st at 7am
+
+[Timer]
+OnCalendar=*-*-01 07:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+Then I run:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable --now bot-expenses.timer
+```
+and check that the timer appears here:
+```
+systemctl list-timers
+```
+To really test that it works, I run:
+```
+sudo systemctl start bot-expenses.service
+```
+
+Now, I do the same for the Immich script and seasontracker.
+
+Also, I have removed the jobs from crontab.
+
