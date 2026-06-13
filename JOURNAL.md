@@ -3127,3 +3127,35 @@ t_and_t-fabric-neoforge-1.13.11.jar # towns and towers
 ```
 and I am using Minecraft version 26.1.2.
 
+
+# 2026/06/12 - Improve management of cron and services (Part 1)
+
+I have started implementing the changes described in [issue #96](https://github.com/MarcSerraPeralta/homelab/issues/96).
+I have also set `vim` as the default editor in my home server, by
+```
+# add the following lines to ~/.bashrc
+export EDITOR=vim
+export VISUAL=vim
+```
+Then, I have also set up `sudo` so that it maintains the preferred editor:
+```
+sudo EDITOR=vim visudo
+```
+and uncomment the line:
+```
+Defaults env_keep += "EDITOR VISUAL"
+```
+
+Before changing the services, I need to create a script that sends me an email.
+I will use the email that I created for the server: `bot.servidoret@gmail.com`.
+I will store the python script and the venv in `/opt`, in particular in:
+```
+/opt/notifier/...
+```
+because this is a service that will run and I want to have all the permisions
+for the files and directories correctly set, and also I want to avoid having it
+on my home directory because it can be bug prone (e.g. I start moving stuff).
+
+I will probably also move where the monitoring data is located and put it
+in some directory inside `/srv` or `/srv_msata`.
+
