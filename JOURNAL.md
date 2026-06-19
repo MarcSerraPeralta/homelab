@@ -3304,3 +3304,47 @@ Now, I do the same for the Immich script and seasontracker.
 
 Also, I have removed the jobs from crontab.
 
+
+# 2026/06/19 - Store config files using Ansible
+
+I will use `ansible` to store my config files (known as "dotfiles") because of
+the reasons explained in [issue #99](https://github.com/MarcSerraPeralta/homelab/issues/99).
+For my laptop, I just have a "dotfiles repository" in GitHub because they are
+all stored in my home directory.
+
+I will focus now on setting up "notifier" with ansible to test the following three things:
+1. Copy files outside `$HOME`
+1. Edit the permissions to these files
+1. Have a password stored in one of these files
+
+First, I clone the github repo to `$HOME/ansible`:
+```
+cd $HOME
+git clone git@github.com:MarcSerraPeralta/myserver-dotfiles.git ansible
+```
+Then, I create the ansible directory structure:
+```
+mkdir -p ~/ansible/roles/notifier/{tasks,templates,files,handlers}
+cd ~/ansible
+touch site.yml inventory.ini
+```
+I create an encrypted `.env` file with Ansible vault:
+```
+sudo apt install ansible-core
+ansible-vault create roles/notifier/templates/notifier.env.j2
+```
+and I create the main script (`main.yaml`) inside `roles/notifier/tasks`.
+I also add the fixed files `script.py` and `requirements.txt` in `roles/notifier/files/`
+and the ones that have variables that need to be filled in `roles/notifier/templates/`.
+The directory `handlers` specify what to do when one of the files/tasks has 
+been updated.
+Once everything is set up, I run:
+```
+ansible-playbook -i inventory.ini site.yml --ask-vault-pass
+```
+I have tested that it works by restarting the caddy service with
+```
+systemctl restart caddy.service
+```
+and I correctly receive the emails notifying me about it.
+
