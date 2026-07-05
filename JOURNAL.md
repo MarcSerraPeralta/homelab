@@ -3348,3 +3348,19 @@ systemctl restart caddy.service
 ```
 and I correctly receive the emails notifying me about it.
 
+
+# 2026/07/05 - Self-hosted `papra`
+
+I have added `papra` to my home server following the Docker Compose guide in
+the [official papra documentation](https://docs.papra.app/self-hosting/using-docker-compose/).
+I have directly created the ansible role in [my ansible repo](https://github.com/MarcSerraPeralta/myserver-dotfiles/commit/855a7835e7d8171f7372c2d2743362a02934a914).
+I have also added the following line to the Caddyfile:
+```
+# /etc/caddy/Caddyfile
+papra.servidoret.com {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+	reverse_proxy 100.100.50.50:1221
+}
+```
