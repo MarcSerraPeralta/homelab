@@ -3364,3 +3364,8 @@ papra.servidoret.com {
 	reverse_proxy 100.100.50.50:1221
 }
 ```
+
+# 2026/07/06 - Install LocalSend
+
+I have installed LocalSend in my phone and laptop to easily share files across them.
+
