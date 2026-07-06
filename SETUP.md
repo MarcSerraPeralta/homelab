@@ -151,3 +151,25 @@ In the diagram, special ports (see `GLOSSARY.md`) are highlighted with orange.
 
 ![Alt text](./setup_media/20260509.svg)
 
+
+# 2026/07/06
+
+- Ad-blocker at home (`pihole`)
+- Ad-blocker outside home (`pihole` + `tailscale`)
+- Self-hosted "Google Photos" (`immich`)
+- Self-hosted "Netflix" (`jellyfin`)
+- Self-hosted "Spotify" (`jellyfin` + `finamp`)
+- Self-hosted "Discord" (`synapse` + `element`)
+- New TV-show season notificator (`seasontracker`)
+- Own domain name (`servidoret.com`) for smooth encryption certificates
+- Easy-to-type websites (e.g. `jellyfin.servidoret.com`) to access self-hosted services (`caddy`)
+- Setup to download "linux ISOs" in my laptop (`qbittorrent` + `protonvpn`)
+- Self-hosted DNS resolver (`unbound`)
+- Access LAN devices and self-hosted services from outside home (`tailscale`)
+- Monitor stats of home server, immich, and jellyfin (`grafana`)
+- Security camera
+- :new: Self-hosted quick-access document storage (`papra`)
+- :new: Installed "Airdrop" (`localsend`)
+
+![Alt text](./setup_media/20260706.svg)
+
