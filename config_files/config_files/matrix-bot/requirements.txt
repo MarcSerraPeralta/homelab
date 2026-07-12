@@ -1,6 +1,0 @@
-matrix-nio[e2e]==0.25.2
-python-dotenv==1.2.2
-xarray==2025.6.1
-matplotlib==3.10.9
-pandas==2.3.3
-PyYAML==6.0.3

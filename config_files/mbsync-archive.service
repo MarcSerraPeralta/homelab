@@ -1,8 +1,0 @@
-[Unit]
-Description=Incremental Gmail Archive Sync
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/mbsync -Va -D
-ExecStartPost=/home/marc/config_files/email-archive/remove_big_files_from_mail-archive.sh
-SuccessExitStatus=1

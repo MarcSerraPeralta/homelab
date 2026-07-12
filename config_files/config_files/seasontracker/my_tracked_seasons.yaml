@@ -1,8 +1,0 @@
-- user: marc
-  email: marcserraperalta@gmail.com    # Optional, required if using Gmail notifications
-  37854:     # TMDBid from www.themoviedb.org/tv/37854
-    name: One Piece
-    last_watched_season: 1
-  79141:
-    name: Scissor Seven
-    last_watched_season: 2
